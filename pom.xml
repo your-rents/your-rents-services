@@ -8,6 +8,9 @@
 	<name>YourRents Services parent</name>
 	<description>Parent of service projects for the YourRents applications</description>
 	<packaging>pom</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<modules>
 		<module>your-rents-services-geodata</module>
 	</modules>
