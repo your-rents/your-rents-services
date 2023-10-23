@@ -4,12 +4,12 @@
 CREATE TABLE yrs_geodata.city (
     id SERIAL,
     name character varying(256) NOT NULL,
-    province_id bigint,
+    province_id integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE yrs_geodata.city_local_data (
-    id bigint,
+    id integer,
     it_codice_istat character varying(6),
     it_codice_erariale character varying(4)
 );
@@ -28,19 +28,19 @@ CREATE TABLE yrs_geodata.country (
     iso_3 character varying(3),
     local_name character varying(256),
     number integer,
-    continent_id bigint,
+    continent_id integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE yrs_geodata.province (
     id SERIAL,
     name character varying(256) NOT NULL,
-    region_id bigint,
+    region_id integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE yrs_geodata.province_local_data (
-    id bigint,
+    id integer,
     it_codice_istat character varying(3),
     it_sigla character varying(2)
 );
@@ -48,11 +48,11 @@ CREATE TABLE yrs_geodata.province_local_data (
 CREATE TABLE yrs_geodata.region (
     id SERIAL,
     name character varying(256) NOT NULL,
-    country_id bigint,
+    country_id integer,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE yrs_geodata.region_local_data (
-    id bigint,
+    id integer,
     it_codice_istat character varying(2)
 );
