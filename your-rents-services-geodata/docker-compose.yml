@@ -1,0 +1,29 @@
+version: '3'
+volumes:
+  postgres-yrs-geodata:
+    driver: local
+services:
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres-yrs-geodata
+    ports:
+      - 28080:8080
+    networks:
+      - yrs-network
+  postgres-yrs-geodata:
+    image: postgres:15
+    volumes:
+      - postgres-yrs-geodata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: yrs_geodata
+      POSTGRES_USER: yrs_geodata
+      POSTGRES_PASSWORD: yrs_geodata
+    ports:
+      - 15432:5432
+    networks:
+      - yrs-network
+networks:
+  yrs-network:
+    driver: bridge
