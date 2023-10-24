@@ -1,6 +1,5 @@
 package com.yourrents.services.geodata.controller;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,8 @@ public class CityController {
     }
 
     @GetMapping("/{uuid}")
-    public Optional<City> findByUuid(@PathVariable UUID uuid) {
-        return cityRepository.findByExternalId(uuid);
+    public City findByUuid(@PathVariable UUID uuid) {
+        return cityRepository.findByExternalId(uuid).get();
     }
     
 }
