@@ -37,11 +37,11 @@ Try the services at <http://localhost:8080/swagger-ui.html>.
 
 You can inspect the database using Adminer at <http://localhost:28080> with the following connection parameters:
 
-**System:** PostgreSQL
-**Server:** postgres-yrs-geodata
-**Username:** yrs_geodata
-**Password:** yrs_geodata
-**Database:** yrs_geodata
+- **System:** PostgreSQL
+- **Server:** postgres-yrs-geodata
+- **Username:** yrs_geodata
+- **Password:** yrs_geodata
+- **Database:** yrs_geodata
 
 ### Cleaning the database
 
