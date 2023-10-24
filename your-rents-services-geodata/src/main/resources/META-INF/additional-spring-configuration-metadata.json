@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "yrs-geodata.description",
+      "type": "java.lang.String",
+      "description": "The description of the application"
+    },
+    {
+      "name": "yrs-geodata.version",
+      "type": "java.lang.String",
+      "description": "The version of the application"
+    },
+    {
+      "name": "yrs-geodata.api.version",
+      "type": "java.lang.String",
+      "description": "The version of the API"
+    },
+    {
+      "name": "yrs-geodata.api.basepath",
+      "type": "java.lang.String",
+      "description": "The base path of the API"
+    }
+  ]
+}

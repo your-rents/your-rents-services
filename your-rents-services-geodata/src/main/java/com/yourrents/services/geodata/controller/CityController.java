@@ -13,7 +13,7 @@ import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
 
 @RestController
-@RequestMapping("/api/v1/geodata/cities")
+@RequestMapping("${yrs-geodata.api.basepath}/cities")
 public class CityController {
     @Autowired
     private CityRepository cityRepository;

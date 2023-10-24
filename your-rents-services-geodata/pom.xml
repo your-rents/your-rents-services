@@ -17,6 +17,7 @@
 		<java.version>17</java.version>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<spring-boot.version>3.1.5</spring-boot.version>
+		<springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
 		<testcontainers-jooq-codegen-maven-plugin.version>0.0.3</testcontainers-jooq-codegen-maven-plugin.version>
 		<plugins.testcontainers.version>1.19.1</plugins.testcontainers.version>
 		<plugins.postgresql.version>42.6.0</plugins.postgresql.version>
@@ -59,6 +60,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-docker-compose</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${springdoc-openapi-ui.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
