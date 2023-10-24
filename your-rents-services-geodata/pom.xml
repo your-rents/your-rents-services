@@ -142,7 +142,7 @@
 									yrs_geodata
 								</schemas>
 								<locations>
-									filesystem:src/main/resources/yrs-geodata/db/migration
+									filesystem:${project.basedir}/src/main/resources/yrs-geodata/db/migration
 								</locations>								
 							</flyway>
 							<jooq>
