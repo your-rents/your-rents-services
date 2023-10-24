@@ -1,14 +1,20 @@
 package com.yourrents.services.geodata.repository;
 
-import static com.yourrents.services.geodata.jooq.tables.City.*;
+import static org.jooq.impl.DSL.*;
+import static com.yourrents.services.geodata.jooq.Tables.*;
+import static org.jooq.Records.mapping;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
+import org.jooq.Record4;
+import org.jooq.SelectOnConditionStep;
 import org.springframework.stereotype.Repository;
 
-import com.yourrents.services.geodata.jooq.tables.records.CityRecord;
+import com.yourrents.services.geodata.model.City;
+import com.yourrents.services.geodata.model.CityLocalData;
+import com.yourrents.services.geodata.model.Province;
 
 @Repository
 public class CityRepository {
@@ -18,18 +24,32 @@ public class CityRepository {
         this.dsl = dsl;
     }
 
-    public List<CityRecord> findAll() {
-        return dsl.selectFrom(CITY)
-            .orderBy(CITY.NAME.asc()).fetch();
+    public Iterable<City> findAll() {
+        return getSelectCitySpec()
+                .orderBy(CITY.NAME.asc()).fetch(mapping(City::new));
     }
 
-    public CityRecord findById(Integer id) {
-        return dsl.selectFrom(CITY)
-                .where(CITY.ID.eq(id)).fetchOne();
+    public Optional<City> findById(Integer id) {
+        return getSelectCitySpec()
+                .where(CITY.ID.eq(id))
+                .fetchOptional()
+                .map(mapping(City::new));
     }
 
-    public CityRecord findByExternalId(UUID externalId) {
-        return dsl.selectFrom(CITY)
-                .where(CITY.EXTERNAL_ID.eq(externalId)).fetchOne();
+    public Optional<City> findByExternalId(UUID externalId) {
+        return getSelectCitySpec()
+                .where(CITY.EXTERNAL_ID.eq(externalId))
+                .fetchOptional()
+                .map(mapping(City::new));
     }
+
+    private SelectOnConditionStep<Record4<UUID, String, CityLocalData, Province>> getSelectCitySpec() {
+        return dsl.select(
+                CITY.EXTERNAL_ID, CITY.NAME,
+                row(CITY_LOCAL_DATA.IT_CODICE_ISTAT, CITY_LOCAL_DATA.IT_CODICE_ERARIALE)
+                        .mapping(CityLocalData::new).as("localData"),
+                row(CITY.province().EXTERNAL_ID, CITY.province().NAME)
+                        .mapping(Province::new).as("province"))
+                .from(CITY).join(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
+    }    
 }
