@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: YourRents Geodata Service
+  flyway:
+    locations: classpath:/yrs-geodata/db/migration
+    schemas: yrs_geodata
+  data:
+    web:
+      pageable:
+        max-page-size: 2147483647
+        default-page-size: 20
+
+yrs-geodata:
+  version: v1
+  description: YourRents Geodata Service
+  api:
+    version: ${yrs-geodata.version}
+    basepath: /api/${yrs-geodata.api.version}/geodata
+
