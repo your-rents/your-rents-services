@@ -2,7 +2,12 @@ package com.yourrents.services.geodata.controller;
 
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,13 +23,14 @@ public class CityController {
     private CityRepository cityRepository;
 
     @GetMapping
-    public Iterable<City> findAll() {
-        return cityRepository.findAll();
+    public Page<City> getCities(
+            @ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
+        return cityRepository.find(pagination);
     }
 
     @GetMapping("/{uuid}")
-    public City findByUuid(@PathVariable UUID uuid) {
+    public City getByUuid(@PathVariable UUID uuid) {
         return cityRepository.findByExternalId(uuid).get();
     }
-    
+
 }
