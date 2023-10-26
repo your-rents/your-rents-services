@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<Object> handleNoSuchElement(NoSuchElementException e, NativeWebRequest request) {
@@ -22,7 +22,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private ApiError buildErrorResponse(String message, Exception e, NativeWebRequest request, int status) {
-        return new ApiError("Resource not found", e.getMessage(), status,
+        return new ApiError(message, e.getMessage(), status,
                 ((HttpServletRequest)(request.getNativeRequest())).getRequestURI());
     }
 

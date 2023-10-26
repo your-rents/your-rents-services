@@ -20,7 +20,7 @@ import com.yourrents.services.geodata.model.City;
 
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
-public class CityRepositoryTest {
+class CityRepositoryTest {
 
     @Autowired
     private CityRepository cityRepository;
