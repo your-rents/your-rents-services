@@ -112,6 +112,11 @@
 				<version>${spring-boot.version}</version>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+			</plugin>
+			<plugin>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
 				<version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
@@ -147,7 +152,7 @@
 								</schemas>
 								<locations>
 									filesystem:${project.basedir}/src/main/resources/yrs-geodata/db/migration
-								</locations>								
+								</locations>
 							</flyway>
 							<jooq>
 								<generator>
