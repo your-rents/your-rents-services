@@ -12,6 +12,8 @@ COPY yrs_geodata.continent (id, code, name) FROM stdin;
 7	SA	South America
 \.
 
+SELECT pg_catalog.setval('yrs_geodata.continent_id_seq', 7, true);
+
 COPY yrs_geodata.country (id, iso_code, english_full_name, iso_3, local_name, number, continent_id) FROM stdin;
 1	AD	Principality of Andorra	AND	Andorra	20	4
 2	AE	United Arab Emirates	ARE	United Arab Emirates	784	3
@@ -260,3 +262,5 @@ COPY yrs_geodata.country (id, iso_code, english_full_name, iso_3, local_name, nu
 245	ZM	Republic of Zambia	ZMB	Zambia	894	1
 246	ZW	Republic of Zimbabwe	ZWE	Zimbabwe	716	1
 \.
+
+SELECT pg_catalog.setval('yrs_geodata.country_id_seq', 246, true);

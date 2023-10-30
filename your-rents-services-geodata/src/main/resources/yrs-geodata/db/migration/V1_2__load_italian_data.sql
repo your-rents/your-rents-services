@@ -8025,6 +8025,8 @@ COPY yrs_geodata.city (id, name, province_id) FROM stdin;
 8020	Vizzolo Predabissi	15
 \.
 
+SELECT pg_catalog.setval('yrs_geodata.city_id_seq', 8020, true);
+
 COPY yrs_geodata.city_local_data (id, it_codice_istat, it_codice_erariale) FROM stdin;
 1	28001	A001
 2	98001	A004
@@ -16158,6 +16160,8 @@ COPY yrs_geodata.province (id, name, region_id) FROM stdin;
 107	Carbonia-Iglesias	20
 \.
 
+SELECT pg_catalog.setval('yrs_geodata.province_id_seq', 107, true);
+
 COPY yrs_geodata.province_local_data (id, it_codice_istat, it_sigla) FROM stdin;
 1	1	TO
 2	2	VC
@@ -16290,6 +16294,8 @@ COPY yrs_geodata.region (id, name, country_id) FROM stdin;
 19	SICILIA	109
 20	SARDEGNA	109
 \.
+
+SELECT pg_catalog.setval('yrs_geodata.region_id_seq', 20, true);
 
 COPY yrs_geodata.region_local_data (id, it_codice_istat) FROM stdin;
 1	1
