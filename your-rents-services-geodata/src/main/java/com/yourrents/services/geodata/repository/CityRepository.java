@@ -2,7 +2,8 @@ package com.yourrents.services.geodata.repository;
 
 import static org.jooq.impl.DSL.*;
 import static com.yourrents.services.geodata.jooq.Tables.*;
-import static org.jooq.Records.mapping;
+import static org.jooq.Records.*;
+import static org.jooq.Functions.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -69,10 +70,10 @@ public class CityRepository {
         return dsl.select(
                 CITY.EXTERNAL_ID.as("uuid"), CITY.NAME.as("name"),
                 row(CITY_LOCAL_DATA.IT_CODICE_ISTAT, CITY_LOCAL_DATA.IT_CODICE_ERARIALE)
-                        .mapping(CityLocalData::new).as("localData"),
+                        .mapping(nullOnAllNull(CityLocalData::new)).as("localData"),
                 row(CITY.province().EXTERNAL_ID, CITY.province().NAME)
-                        .mapping(Province::new).as("province"))
-                .from(CITY).join(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
+                        .mapping(nullOnAllNull(Province::new)).as("province"))
+                .from(CITY).leftJoin(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
     }
 
     private SortField<?>[] getCitySortFields(Pageable pageable) {
