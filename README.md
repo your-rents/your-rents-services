@@ -2,6 +2,8 @@
 
 Modules for the YourRents application.
 
+[![Build](https://github.com/your-rents/your-rents-services/actions/workflows/maven.yml/badge.svg)](https://github.com/your-rents/your-rents-services/actions/workflows/maven.yml)
+
 ## Prerequisites
 
 - Java 17+
@@ -49,10 +51,13 @@ If you need a fresh database:
 
 - stop the service
 - remove the Docker containers:
+
      ```shell
      docker compose down
      ```
+
 - Remove the `your-rents-services-geodata_postgres-yrs-geodata` volume:
+
      ```shell
      docker volume rm your-rents-services-geodata_postgres-yrs-geodata
      ```
