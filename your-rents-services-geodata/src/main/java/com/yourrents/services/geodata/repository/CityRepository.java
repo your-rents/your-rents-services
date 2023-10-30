@@ -82,10 +82,10 @@ public class CityRepository {
                 .map(sort -> {
                     Field<?> field = switch (sort.getProperty()) {
                         case "name" -> CITY.NAME;
-                        default -> {
+                        default ->
                             throw new IllegalArgumentException(
                                     "Unexpected value for sort property: " + sort.getProperty());
-                        }
+
                     };
                     if (sort.isAscending()) {
                         return field.asc();

@@ -19,7 +19,7 @@ import com.yourrents.services.geodata.repository.CityRepository;
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
-public class CityControllerTest {
+class CityControllerTest {
     @Autowired
     private MockMvc mvc;
     @Autowired
