@@ -7,7 +7,7 @@ import com.yourrents.services.geodata.model.Country;
 import java.util.Optional;
 import java.util.UUID;
 import org.jooq.DSLContext;
-import org.jooq.Record4;
+import org.jooq.Record6;
 import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
 
@@ -34,11 +34,13 @@ public class CountryRepository {
 				.map(mapping(Country::new));
 	}
 
-	private SelectJoinStep<Record4<String, String, String, UUID>> getSelectedCountries() {
+	private SelectJoinStep<Record6<String, String, String, String, Integer, UUID>> getSelectedCountries() {
 		return dsl.select(
 						COUNTRY.ISO_CODE.as("isoCode"),
-						COUNTRY.LOCAL_NAME.as("localName"),
 						COUNTRY.ENGLISH_FULL_NAME.as("englishFullName"),
+						COUNTRY.ISO_3.as("iso3"),
+						COUNTRY.LOCAL_NAME.as("localName"),
+						COUNTRY.NUMBER.as("number"),
 						COUNTRY.EXTERNAL_ID.as("uuid"))
 				.from(COUNTRY);
 	}

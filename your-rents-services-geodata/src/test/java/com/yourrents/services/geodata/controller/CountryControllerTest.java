@@ -38,8 +38,11 @@ class CountryControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.isoCode", is("AD")))
+				.andExpect(jsonPath("$.englishFullName", is("Principality of Andorra")))
+				.andExpect(jsonPath("$.iso3", is("AND")))
 				.andExpect(jsonPath("$.localName", is("Andorra")))
-				.andExpect(jsonPath("$.englishFullName", is("Principality of Andorra")));
+				.andExpect(jsonPath("$.number", is(20)))
+				.andExpect(jsonPath("$.uuid", is(expected.uuid().toString())));
 	}
 
 }
