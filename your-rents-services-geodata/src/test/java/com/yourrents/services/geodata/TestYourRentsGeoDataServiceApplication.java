@@ -9,15 +9,17 @@ import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class TestYourRentsGeoDataServiceApplication {
+	static final String POSTGRES_IMAGE = "postgres:15";
 
 	@Bean
 	@ServiceConnection
 	PostgreSQLContainer<?> postgresContainer() {
-		return new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"));
+		return new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE));
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.from(YourRentsGeoDataServiceApplication::main).with(TestYourRentsGeoDataServiceApplication.class).run(args);
+		SpringApplication.from(YourRentsGeoDataServiceApplication::main)
+				.with(TestYourRentsGeoDataServiceApplication.class).run(args);
 	}
 
 }
