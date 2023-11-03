@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest()
@@ -33,5 +38,13 @@ class CountryRepositoryTest {
 		assertThat(switzerland.englishFullName()).isEqualTo("Swiss Confederation");
 		assertThat(switzerland.isoCode()).isEqualTo("CH");
 		assertThat(switzerland.localName()).isEqualTo("Switzerland");
+	}
+
+	@Test
+	void testFindFirstPageWithOrderByNumberDesc() {
+		Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.desc("number")));
+		Page<Country> result = countryRepository.find(pageable);
+		assertThat(result.getContent().get(0).localName()).isEqualTo("Zambia");
+		assertThat(result.getContent().get(0).number()).isEqualTo(894);
 	}
 }
