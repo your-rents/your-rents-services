@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
+import com.yourrents.services.geodata.util.search.Searchable;
 
 @RestController
 @RequestMapping("${yrs-geodata.api.basepath}/cities")
@@ -24,6 +25,7 @@ class CityController {
 
     @GetMapping
     public Page<City> getCities(
+            Searchable filter,
             @ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
         return cityRepository.find(pagination);
     }
