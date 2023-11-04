@@ -17,6 +17,8 @@ import org.springframework.data.domain.Sort.Order;
 
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.City;
+import com.yourrents.services.geodata.util.search.FilterCondition;
+import com.yourrents.services.geodata.util.search.FilterCriteria;
 
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
@@ -27,14 +29,14 @@ class CityRepositoryTest {
 
     @Test
     void testFindAll() {
-        Page<City> result = cityRepository.find(PageRequest.ofSize(Integer.MAX_VALUE));
+        Page<City> result = cityRepository.find(FilterCriteria.of(), PageRequest.ofSize(Integer.MAX_VALUE));
         assertThat(result, iterableWithSize(8020));
     }
 
     @Test
     void testFindFirstPageWithOrderByNameAsc() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.asc("name")));
-        Page<City> result = cityRepository.find(pageable);
+        Page<City> result = cityRepository.find(FilterCriteria.of(), pageable);
         assertThat(result, iterableWithSize(10));
         assertThat(result.getContent().get(0).name(), equalTo("Abano Terme"));
         assertThat(result.getContent().get(9).name(), equalTo("Acate"));
@@ -43,7 +45,7 @@ class CityRepositoryTest {
     @Test
     void testFindFirstPageWithOrderByNameDesc() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.desc("name")));
-        Page<City> result = cityRepository.find(pageable);
+        Page<City> result = cityRepository.find(FilterCriteria.of(), pageable);
         assertThat(result, iterableWithSize(10));
         assertThat(result.getContent().get(0).name(), equalTo("Vizzolo Predabissi"));
         assertThat(result.getContent().get(9).name(), equalTo("Vittuone"));
@@ -52,10 +54,28 @@ class CityRepositoryTest {
     @Test
     void testFindLastPageWithOrderByNameAsc() {
         Pageable pageable = PageRequest.of(801, 10, Sort.by(Order.asc("name")));
-        Page<City> result = cityRepository.find(pageable);
+        Page<City> result = cityRepository.find(FilterCriteria.of(), pageable);
         assertThat(result, iterableWithSize(10));
         assertThat(result.getContent().get(0).name(), equalTo("Vittuone"));
         assertThat(result.getContent().get(9).name(), equalTo("Vizzolo Predabissi"));
+    }
+
+    @Test
+    void testFindFilteredByNameEqualsWithOrderByNameAsc() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.asc("name")));
+        FilterCriteria filter = FilterCriteria.of(FilterCondition.of("name", "eq", "Abano Terme"));
+        Page<City> result = cityRepository.find(filter, pageable);
+        assertThat(result, iterableWithSize(1));
+        assertThat(result.getContent().get(0).name(), equalTo("Abano Terme"));
+    }
+
+    @Test
+    void testFindFilteredByNameContainsIgnoreCaseWithOrderByNameAsc() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("name")));
+        FilterCriteria filter = FilterCriteria.of(FilterCondition.of("name", "containsIgnoreCase", "Terme"));
+        Page<City> result = cityRepository.find(filter, pageable);
+        assertThat(result, iterableWithSize(42));
+        assertThat(result.getContent().get(0).name(), equalTo("Abano Terme"));
     }
 
     @Test

@@ -11,6 +11,10 @@ public class FilterCondition implements SearchCondition<String, String, String> 
         this.value = value;
     }
 
+    public static FilterCondition of(String field, String operator, String value) {
+        return new FilterCondition(field, operator, value);
+    }
+
     @Override
     public String getKey() {
         return field;
