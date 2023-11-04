@@ -5,6 +5,7 @@ import static org.jooq.impl.DSL.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Select;
@@ -72,5 +73,21 @@ public class JooqUtils {
                         }
                 }
                 return result.toArray(SortField[]::new);
+        }
+
+        public static Condition buildStringCondition(Field<String> field, String operator, String value) {
+                return switch (operator) {
+                        case "eq" -> field.eq(value);
+                        case "ne" -> field.ne(value);
+                        case "gt" -> field.gt(value);
+                        case "ge" -> field.ge(value);
+                        case "lt" -> field.lt(value);
+                        case "le" -> field.le(value);
+                        case "contains" -> field.contains(value);
+                        case "containsIgnoreCase" -> field.containsIgnoreCase(value);
+                        case "startsWith" -> field.startsWith(value);
+                        case "endsWith" -> field.endsWith(value);
+                        default -> throw new IllegalArgumentException("Unsupported operator: " + operator);
+                };
         }
 }

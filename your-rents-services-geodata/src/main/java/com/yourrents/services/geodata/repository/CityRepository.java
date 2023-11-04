@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record4;
@@ -25,6 +26,8 @@ import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
 import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.util.JooqUtils;
+import com.yourrents.services.geodata.util.search.SearchCondition;
+import com.yourrents.services.geodata.util.search.Searchable;
 
 @Repository
 public class CityRepository {
@@ -34,10 +37,10 @@ public class CityRepository {
         this.dsl = dsl;
     }
 
-    public Page<City> find(Pageable pageable) {
+    public Page<City> find(Searchable filter, Pageable pageable) {
         Select<?> result = JooqUtils.paginate(
                 dsl,
-                getSelectCitySpec(),
+                getSelectCitySpec().where(getCondition(filter)),
                 getCitySortFields(pageable),
                 pageable.getPageSize(), pageable.getOffset());
         List<City> cities = result.fetch(r -> {
@@ -76,24 +79,44 @@ public class CityRepository {
                 .from(CITY).leftJoin(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
     }
 
-    private SortField<?>[] getCitySortFields(Pageable pageable) {
-        List<String> allowedSortFields = List.of("name");
-        return pageable.getSort()
-                .filter(sort -> allowedSortFields.contains(sort.getProperty()))
-                .map(sort -> {
-                    Field<?> field = switch (sort.getProperty()) {
-                        case "name" -> CITY.NAME;
-                        default ->
-                            throw new IllegalArgumentException(
-                                    "Unexpected value for sort property: " + sort.getProperty());
+    private Condition getCondition(Searchable filter) {
+        return filter.getFilter().entrySet().stream()
+                .filter(e -> isFieldSupported(e.getKey()))
+                .map(e -> {
+                    SearchCondition<?, ?, ?> c = e.getValue();
+                    Field<?> field = getSupportedField(c.getKey().toString());
+                    return JooqUtils.buildStringCondition(
+                            field.coerce(String.class),
+                            c.getOperator().toString(),
+                            c.getValue().toString());
+                }).reduce(trueCondition(), Condition::and);
+    }
 
-                    };
+    private SortField<?>[] getCitySortFields(Pageable pageable) {
+        return pageable.getSort()
+                .filter(sort -> isFieldSupported(sort.getProperty()))
+                .map(sort -> {
+                    Field<?> field = getSupportedField(sort.getProperty());
                     if (sort.isAscending()) {
                         return field.asc();
                     } else {
                         return field.desc();
                     }
                 }).stream().toArray(SortField[]::new);
+    }
+
+    private boolean isFieldSupported(String name) {
+        List<String> allowedFilterFields = List.of("name");
+        return allowedFilterFields.contains(name);
+    }
+
+    private Field<?> getSupportedField(String field) {
+        return switch (field) {
+            case "name" -> CITY.NAME;
+            default ->
+                throw new IllegalArgumentException(
+                        "Unexpected value for filter/sort field: " + field);
+        };
     }
 
 }
