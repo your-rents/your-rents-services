@@ -10,13 +10,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record4;
 import org.jooq.Select;
 import org.jooq.SelectOnConditionStep;
-import org.jooq.SortField;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -24,31 +22,32 @@ import org.springframework.stereotype.Repository;
 
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
-import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.util.JooqUtils;
-import com.yourrents.services.geodata.util.search.SearchCondition;
 import com.yourrents.services.geodata.util.search.Searchable;
 
 @Repository
 public class CityRepository {
     private final DSLContext dsl;
+    private final JooqUtils jooqUtils;
 
-    public CityRepository(DSLContext dsl) {
+    public CityRepository(DSLContext dsl, JooqUtils jooqUtils) {
         this.dsl = dsl;
+        this.jooqUtils = jooqUtils;
     }
 
     public Page<City> find(Searchable filter, Pageable pageable) {
-        Select<?> result = JooqUtils.paginate(
+        Select<?> result = jooqUtils.paginate(
                 dsl,
-                getSelectCitySpec().where(getCondition(filter)),
-                getCitySortFields(pageable),
+                jooqUtils.getQueryWithConditionsAndSorts(getSelectCitySpec(),
+                        filter, this::getSupportedField,
+                        pageable, this::getSupportedField),
                 pageable.getPageSize(), pageable.getOffset());
         List<City> cities = result.fetch(r -> {
             return new City(
                     r.get("uuid", UUID.class),
                     r.get("name", String.class),
                     r.get("localData", CityLocalData.class),
-                    r.get("province", Province.class));
+                    r.get("province", City.Province.class));
         });
         int totalRows = Objects.requireNonNullElse(
                 result.fetchAny("total_rows", Integer.class), 0);
@@ -69,50 +68,22 @@ public class CityRepository {
                 .map(mapping(City::new));
     }
 
-    private SelectOnConditionStep<Record4<UUID, String, CityLocalData, Province>> getSelectCitySpec() {
+    private SelectOnConditionStep<Record4<UUID, String, CityLocalData, City.Province>> getSelectCitySpec() {
         return dsl.select(
                 CITY.EXTERNAL_ID.as("uuid"), CITY.NAME.as("name"),
                 row(CITY_LOCAL_DATA.IT_CODICE_ISTAT, CITY_LOCAL_DATA.IT_CODICE_ERARIALE)
                         .mapping(nullOnAllNull(CityLocalData::new)).as("localData"),
                 row(CITY.province().EXTERNAL_ID, CITY.province().NAME)
-                        .mapping(nullOnAllNull(Province::new)).as("province"))
+                        .mapping(nullOnAllNull(City.Province::new)).as("province"))
                 .from(CITY).leftJoin(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
-    }
-
-    private Condition getCondition(Searchable filter) {
-        return filter.getFilter().entrySet().stream()
-                .filter(e -> isFieldSupported(e.getKey()))
-                .map(e -> {
-                    SearchCondition<?, ?, ?> c = e.getValue();
-                    Field<?> field = getSupportedField(c.getKey().toString());
-                    return JooqUtils.buildStringCondition(
-                            field.coerce(String.class),
-                            c.getOperator().toString(),
-                            c.getValue().toString());
-                }).reduce(trueCondition(), Condition::and);
-    }
-
-    private SortField<?>[] getCitySortFields(Pageable pageable) {
-        return pageable.getSort()
-                .filter(sort -> isFieldSupported(sort.getProperty()))
-                .map(sort -> {
-                    Field<?> field = getSupportedField(sort.getProperty());
-                    if (sort.isAscending()) {
-                        return field.asc();
-                    } else {
-                        return field.desc();
-                    }
-                }).stream().toArray(SortField[]::new);
-    }
-
-    private boolean isFieldSupported(String name) {
-        List<String> allowedFilterFields = List.of("name");
-        return allowedFilterFields.contains(name);
     }
 
     private Field<?> getSupportedField(String field) {
         return switch (field) {
             case "name" -> CITY.NAME;
+            case "uuid" -> CITY.EXTERNAL_ID.cast(String.class);
+            case "province.name" -> CITY.province().NAME;
+            case "province.uuid" -> CITY.province().EXTERNAL_ID.cast(String.class);
             default ->
                 throw new IllegalArgumentException(
                         "Unexpected value for filter/sort field: " + field);

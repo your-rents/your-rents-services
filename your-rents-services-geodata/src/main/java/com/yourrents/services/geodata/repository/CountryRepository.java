@@ -6,6 +6,7 @@ import static org.jooq.Records.mapping;
 
 import com.yourrents.services.geodata.model.Country;
 import com.yourrents.services.geodata.util.JooqUtils;
+import com.yourrents.services.geodata.util.search.FilterCriteria;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,7 +16,6 @@ import org.jooq.Field;
 import org.jooq.Record7;
 import org.jooq.Select;
 import org.jooq.SelectOnConditionStep;
-import org.jooq.SortField;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,16 +25,19 @@ import org.springframework.stereotype.Repository;
 public class CountryRepository {
 
 	private final DSLContext dsl;
+	private final JooqUtils jooqUtils;
 
-	CountryRepository(DSLContext dsl) {
+	CountryRepository(DSLContext dsl, JooqUtils jooqUtils) {
 		this.dsl = dsl;
+		this.jooqUtils = jooqUtils;
 	}
 
 	public Page<Country> find(Pageable pageable) {
-		Select<?> result = JooqUtils.paginate(
+		Select<?> result = jooqUtils.paginate(
 				dsl,
-				getSelectedCountries(),
-				getCountriesSortFields(pageable),
+                jooqUtils.getQueryWithConditionsAndSorts(getSelectedCountries(),
+                        FilterCriteria.of(), s -> null,
+                        pageable, this::getSupportedSortField),
 				pageable.getPageSize(), pageable.getOffset());
 
 		List<Country> countries = result.fetch(r -> new Country(
@@ -77,23 +80,13 @@ public class CountryRepository {
 				.on(COUNTRY.CONTINENT_ID.eq(CONTINENT.ID));
 	}
 
-	private SortField<?>[] getCountriesSortFields(Pageable pageable) {
-		List<String> allowedSortFields = List.of("number");
-		return pageable.getSort()
-				.filter(sort -> allowedSortFields.contains(sort.getProperty()))
-				.map(sort -> {
-					Field<?> field = switch (sort.getProperty()) {
-						case "number" -> COUNTRY.NUMBER;
-						default -> throw new IllegalArgumentException(
-								"Unexpected value for sort property: " + sort.getProperty());
-
-					};
-					if (sort.isAscending()) {
-						return field.asc();
-					} else {
-						return field.desc();
-					}
-				}).stream().toArray(SortField[]::new);
-	}
+    private Field<?> getSupportedSortField(String field) {
+        return switch (field) {
+            case "number" -> COUNTRY.NUMBER;
+            default ->
+                throw new IllegalArgumentException(
+                        "Unexpected value for filter/sort field: " + field);
+        };
+    }
 
 }
