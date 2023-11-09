@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.City;
+import com.yourrents.services.geodata.model.CityLocalData;
 import com.yourrents.services.geodata.util.search.FilterCondition;
 import com.yourrents.services.geodata.util.search.FilterCriteria;
 import com.yourrents.services.geodata.util.search.Searchable;
@@ -138,7 +139,6 @@ class CityRepositoryTest {
     void testFindCitiesByProvinceUuidWithOrderByCityNameAsc() {
         Searchable filterForVerona = FilterCriteria.of(FilterCondition.of("province.name", "eq", "Verona"));
         Page<City> cityInVeronaProvince = cityRepository.find(filterForVerona, PageRequest.ofSize(1));
-
         UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
 
         Searchable filter = FilterCriteria.of(FilterCondition.of("province.uuid", "eq", veronaUuid.toString()));
@@ -148,5 +148,33 @@ class CityRepositoryTest {
         assertThat(result.getContent().get(0).name(), equalTo("Affi"));
         assertThat(result.getContent().get(0).province().name(), equalTo("Verona"));
     }    
+
+    @Test
+    void testCreateNewCityInVeronaProvince() {
+        Searchable filterForVerona = FilterCriteria.of(FilterCondition.of("province.name", "eq", "Verona"));
+        Page<City> cityInVeronaProvince = cityRepository.find(filterForVerona, PageRequest.ofSize(1));
+        UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
+
+        City newCity = new City(null, "New City", new CityLocalData("123456", "1234"), new City.Province(veronaUuid, "Not Important"));
+        City result = cityRepository.create(newCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), notNullValue());
+        assertThat(result.name(), equalTo("New City"));
+        assertThat(result.localData().itCodiceIstat(), equalTo("123456"));
+        assertThat(result.localData().itCodiceErariale(), equalTo("1234"));
+        assertThat(result.province().uuid(), equalTo(veronaUuid));
+        assertThat(result.province().name(), equalTo("Verona"));
+    }
+
+    @Test
+    void testCreateNewCityWithoutProvinceAndLocalData() {
+        City newCity = new City(null, "New City", null, null);
+        City result = cityRepository.create(newCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), notNullValue());
+        assertThat(result.name(), equalTo("New City"));
+        assertThat(result.localData(), nullValue());
+        assertThat(result.province(), nullValue());
+    }
 
 }

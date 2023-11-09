@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
@@ -26,68 +27,99 @@ import com.yourrents.services.geodata.util.JooqUtils;
 import com.yourrents.services.geodata.util.search.Searchable;
 
 @Repository
+@Transactional(readOnly = true)
 public class CityRepository {
-    private final DSLContext dsl;
-    private final JooqUtils jooqUtils;
+        private final DSLContext dsl;
+        private final JooqUtils jooqUtils;
 
-    public CityRepository(DSLContext dsl, JooqUtils jooqUtils) {
-        this.dsl = dsl;
-        this.jooqUtils = jooqUtils;
-    }
+        public CityRepository(DSLContext dsl, JooqUtils jooqUtils) {
+                this.dsl = dsl;
+                this.jooqUtils = jooqUtils;
+        }
 
-    public Page<City> find(Searchable filter, Pageable pageable) {
-        Select<?> result = jooqUtils.paginate(
-                dsl,
-                jooqUtils.getQueryWithConditionsAndSorts(getSelectCitySpec(),
-                        filter, this::getSupportedField,
-                        pageable, this::getSupportedField),
-                pageable.getPageSize(), pageable.getOffset());
-        List<City> cities = result.fetch(r -> {
-            return new City(
-                    r.get("uuid", UUID.class),
-                    r.get("name", String.class),
-                    r.get("localData", CityLocalData.class),
-                    r.get("province", City.Province.class));
-        });
-        int totalRows = Objects.requireNonNullElse(
-                result.fetchAny("total_rows", Integer.class), 0);
-        return new PageImpl<>(cities, pageable, totalRows);
-    }
+        public Page<City> find(Searchable filter, Pageable pageable) {
+                Select<?> result = jooqUtils.paginate(
+                                dsl,
+                                jooqUtils.getQueryWithConditionsAndSorts(getSelectCitySpec(),
+                                                filter, this::getSupportedField,
+                                                pageable, this::getSupportedField),
+                                pageable.getPageSize(), pageable.getOffset());
+                List<City> cities = result.fetch(r -> {
+                        return new City(
+                                        r.get("uuid", UUID.class),
+                                        r.get("name", String.class),
+                                        r.get("localData", CityLocalData.class),
+                                        r.get("province", City.Province.class));
+                });
+                int totalRows = Objects.requireNonNullElse(
+                                result.fetchAny("total_rows", Integer.class), 0);
+                return new PageImpl<>(cities, pageable, totalRows);
+        }
 
-    public Optional<City> findById(Integer id) {
-        return getSelectCitySpec()
-                .where(CITY.ID.eq(id))
-                .fetchOptional()
-                .map(mapping(City::new));
-    }
+        public Optional<City> findById(Integer id) {
+                return getSelectCitySpec()
+                                .where(CITY.ID.eq(id))
+                                .fetchOptional()
+                                .map(mapping(City::new));
+        }
 
-    public Optional<City> findByExternalId(UUID externalId) {
-        return getSelectCitySpec()
-                .where(CITY.EXTERNAL_ID.eq(externalId))
-                .fetchOptional()
-                .map(mapping(City::new));
-    }
+        public Optional<City> findByExternalId(UUID externalId) {
+                return getSelectCitySpec()
+                                .where(CITY.EXTERNAL_ID.eq(externalId))
+                                .fetchOptional()
+                                .map(mapping(City::new));
+        }
 
-    private SelectOnConditionStep<Record4<UUID, String, CityLocalData, City.Province>> getSelectCitySpec() {
-        return dsl.select(
-                CITY.EXTERNAL_ID.as("uuid"), CITY.NAME.as("name"),
-                row(CITY_LOCAL_DATA.IT_CODICE_ISTAT, CITY_LOCAL_DATA.IT_CODICE_ERARIALE)
-                        .mapping(nullOnAllNull(CityLocalData::new)).as("localData"),
-                row(CITY.province().EXTERNAL_ID, CITY.province().NAME)
-                        .mapping(nullOnAllNull(City.Province::new)).as("province"))
-                .from(CITY).leftJoin(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
-    }
+        /**
+         * Create a new city
+         * 
+         * @return the created city
+         */
+        @Transactional(readOnly = false)
+        public City create(City city) {
+                Integer provinceId = null;
+                if (city.province() != null) {
+                        provinceId = dsl.select(PROVINCE.ID)
+                                        .from(PROVINCE)
+                                        .where(PROVINCE.EXTERNAL_ID.eq(city.province().uuid()))
+                                        .fetchOne(PROVINCE.ID);
+                }
+                Integer cityId = dsl.insertInto(CITY)
+                                .set(CITY.NAME, city.name())
+                                .set(CITY.PROVINCE_ID, provinceId)
+                                .returning(CITY.ID)
+                                .fetchOne()
+                                .getId();
+                if (city.localData() != null) {
+                        dsl.insertInto(CITY_LOCAL_DATA)
+                                        .set(CITY_LOCAL_DATA.ID, cityId)
+                                        .set(CITY_LOCAL_DATA.IT_CODICE_ISTAT, city.localData().itCodiceIstat())
+                                        .set(CITY_LOCAL_DATA.IT_CODICE_ERARIALE, city.localData().itCodiceErariale())
+                                        .execute();
+                }
+                return findById(cityId).orElseThrow();
+        }
 
-    private Field<?> getSupportedField(String field) {
-        return switch (field) {
-            case "name" -> CITY.NAME;
-            case "uuid" -> CITY.EXTERNAL_ID.cast(String.class);
-            case "province.name" -> CITY.province().NAME;
-            case "province.uuid" -> CITY.province().EXTERNAL_ID.cast(String.class);
-            default ->
-                throw new IllegalArgumentException(
-                        "Unexpected value for filter/sort field: " + field);
-        };
-    }
+        private SelectOnConditionStep<Record4<UUID, String, CityLocalData, City.Province>> getSelectCitySpec() {
+                return dsl.select(
+                                CITY.EXTERNAL_ID.as("uuid"), CITY.NAME.as("name"),
+                                row(CITY_LOCAL_DATA.IT_CODICE_ISTAT, CITY_LOCAL_DATA.IT_CODICE_ERARIALE)
+                                                .mapping(nullOnAllNull(CityLocalData::new)).as("localData"),
+                                row(CITY.province().EXTERNAL_ID, CITY.province().NAME)
+                                                .mapping(nullOnAllNull(City.Province::new)).as("province"))
+                                .from(CITY).leftJoin(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
+        }
+
+        private Field<?> getSupportedField(String field) {
+                return switch (field) {
+                        case "name" -> CITY.NAME;
+                        case "uuid" -> CITY.EXTERNAL_ID.cast(String.class);
+                        case "province.name" -> CITY.province().NAME;
+                        case "province.uuid" -> CITY.province().EXTERNAL_ID.cast(String.class);
+                        default ->
+                                throw new IllegalArgumentException(
+                                                "Unexpected value for filter/sort field: " + field);
+                };
+        }
 
 }

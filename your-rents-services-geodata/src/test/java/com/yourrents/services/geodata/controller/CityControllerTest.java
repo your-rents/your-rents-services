@@ -4,19 +4,27 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
+import com.yourrents.services.geodata.util.search.FilterCondition;
+import com.yourrents.services.geodata.util.search.FilterCriteria;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
 class CityControllerTest {
@@ -102,4 +110,55 @@ class CityControllerTest {
                 .andExpect(jsonPath("$.province").exists())
                 .andExpect(jsonPath("$.province.name", is("Padova")));
     }
+
+    @Test
+    void testCreateNewCityInVeronaProvince() throws Exception {
+        Page<City> cityInVeronaProvince = cityRepository.find(FilterCriteria.of(FilterCondition.of("province.name", "eq", "Verona")), 
+                PageRequest.ofSize(1));
+        UUID veronaProvinceUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
+
+        mvc.perform(post(basePath + "/cities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "New City",
+                            "province": {
+                                "uuid": "%s",
+                                "name": "Not important"
+                            },
+                            "localData": {
+                                "itCodiceIstat": "123456",
+                                "itCodiceErariale": "1234"
+                            }
+                        }
+                        """.formatted(veronaProvinceUuid)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.uuid").isNotEmpty())
+                .andExpect(jsonPath("$.name", is("New City")))
+                .andExpect(jsonPath("$.localData").exists())
+                .andExpect(jsonPath("$.localData.itCodiceIstat", is("123456")))
+                .andExpect(jsonPath("$.localData.itCodiceErariale", is("1234")))
+                .andExpect(jsonPath("$.province").exists())
+                .andExpect(jsonPath("$.province.uuid", is(veronaProvinceUuid.toString())))
+                .andExpect(jsonPath("$.province.name", is("Verona")));
+    }
+
+    @Test
+    void testCreateNewCityWithoutProvinceAndLocalData() throws Exception {
+        mvc.perform(post(basePath + "/cities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "New City"
+                        }
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.uuid").isNotEmpty())
+                .andExpect(jsonPath("$.name", is("New City")))
+                .andExpect(jsonPath("$.localData").doesNotExist())
+                .andExpect(jsonPath("$.province").doesNotExist());
+    }
+
 }
