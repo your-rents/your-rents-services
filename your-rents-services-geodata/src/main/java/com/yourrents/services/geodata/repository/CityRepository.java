@@ -82,6 +82,8 @@ public class CityRepository {
         return switch (field) {
             case "name" -> CITY.NAME;
             case "uuid" -> CITY.EXTERNAL_ID.cast(String.class);
+            case "province.name" -> CITY.province().NAME;
+            case "province.uuid" -> CITY.province().EXTERNAL_ID.cast(String.class);
             default ->
                 throw new IllegalArgumentException(
                         "Unexpected value for filter/sort field: " + field);
