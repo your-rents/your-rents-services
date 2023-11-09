@@ -2,18 +2,27 @@ package com.yourrents.services.geodata.util;
 
 import static org.jooq.impl.DSL.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Function;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Select;
+import org.jooq.SelectFinalStep;
+import org.jooq.SelectQuery;
 import org.jooq.SortField;
-import org.jooq.SortOrder;
 import org.jooq.Table;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
+import com.yourrents.services.geodata.util.search.SearchCondition;
+import com.yourrents.services.geodata.util.search.Searchable;
+
+@Service
 public class JooqUtils {
+
+        public JooqUtils() {
+        }
 
         /**
          * Paginate a query
@@ -23,26 +32,23 @@ public class JooqUtils {
          * 
          * @param ctx
          * @param original
-         * @param sort
          * @param limit
          * @param offset
          * @return
          */
-        public static Select<?> paginate(
+        public Select<?> paginate(
                         DSLContext ctx,
                         Select<?> original,
-                        SortField<?>[] sort,
                         int limit,
                         long offset) {
                 Table<?> u = original.asTable("u");
                 Field<Integer> totalRows = count().over().as("total_rows");
-                Field<Integer> row = rowNumber().over().orderBy(adaptSortFieldsToTable(sort, u)).as("row");
+                Field<Integer> row = rowNumber().over().as("row");
 
                 Table<?> t = ctx
                                 .select(u.asterisk())
                                 .select(totalRows, row)
                                 .from(u)
-                                .orderBy(adaptSortFieldsToTable(sort, u))
                                 .limit(limit)
                                 .offset(offset)
                                 .asTable("t");
@@ -57,25 +63,77 @@ public class JooqUtils {
                                                 t.field(row),
                                                 t.field(row).minus(inline(1)).div(limit).plus(inline(1))
                                                                 .as("current_page"))
-                                .from(t)
-                                .orderBy(adaptSortFieldsToTable(sort, t));
+                                .from(t);
                 return result;
         }
 
-        private static SortField<?>[] adaptSortFieldsToTable(SortField<?>[] sort, Table<?> table) {
-                List<SortField<?>> result = new ArrayList<>();
-                for (SortField<?> sortField : sort) {
-                        Field<?> field = table.field(sortField.getName());
-                        if (sortField.getOrder().equals(SortOrder.DESC)) {
-                                result.add(field.desc());
-                        } else {
-                                result.add(field.asc());
-                        }
-                }
-                return result.toArray(SortField[]::new);
+        private Condition getCondition(Searchable filter, Function<String, Field<?>> fieldMapper) {
+                return getCondition(filter, fieldMapper, true);
         }
 
-        public static Condition buildStringCondition(Field<String> field, String operator, String value) {
+        private Condition getCondition(Searchable filter, Function<String, Field<?>> fieldMapper,
+                        boolean ignoreNotSupported) {
+                return filter.getFilter().entrySet().stream()
+                                .filter(e -> !ignoreNotSupported || isFieldSupported(e.getKey(), fieldMapper))
+                                .map(e -> {
+                                        SearchCondition<?, ?, ?> c = e.getValue();
+                                        Field<?> field = fieldMapper.apply(c.getKey().toString());
+                                        return buildStringCondition(
+                                                        field.coerce(String.class),
+                                                        c.getOperator().toString(),
+                                                        c.getValue().toString());
+                                }).reduce(trueCondition(), Condition::and);
+        }
+
+        private SortField<?>[] getSortFields(Pageable pageable, Function<String, Field<?>> fieldMapper) {
+                return getSortFields(pageable, fieldMapper, true);
+        }
+
+        private SortField<?>[] getSortFields(Pageable pageable, Function<String, Field<?>> fieldMapper,
+                        boolean ignoreNotSupported) {
+                return pageable.getSort()
+                                .filter(sort -> !ignoreNotSupported
+                                                || isFieldSupported(sort.getProperty(), fieldMapper))
+                                .map(sort -> {
+                                        Field<?> field = fieldMapper.apply(sort.getProperty());
+                                        if (sort.isAscending()) {
+                                                return field.asc();
+                                        } else {
+                                                return field.desc();
+                                        }
+                                }).stream().toArray(SortField[]::new);
+        }
+
+        private boolean isFieldSupported(String field, Function<String, Field<?>> fieldMapper) {
+                try {
+                        if (fieldMapper.apply(field) != null) {
+                                return true;
+                        } else {
+                                return false;
+                        }
+                } catch (IllegalArgumentException e) {
+                        return false;
+                }
+        }
+
+        public Select<?> getQueryWithConditionsAndSorts(SelectFinalStep<?> query,
+                        Searchable filter, Function<String, Field<?>> filterFieldMapper,
+                        Pageable pageable, Function<String, Field<?>> sortFieldMapper) {
+                SelectQuery<?> result = query.getQuery();
+                result.addConditions(getCondition(filter, filterFieldMapper));
+                result.addOrderBy(getSortFields(pageable, sortFieldMapper));
+                return result;
+        }
+
+        /**
+         * Build a condition for a field
+         * 
+         * @param field
+         * @param operator
+         * @param value
+         * @return
+         */
+        private Condition buildStringCondition(Field<String> field, String operator, String value) {
                 return switch (operator) {
                         case "eq" -> field.eq(value);
                         case "ne" -> field.ne(value);

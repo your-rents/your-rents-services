@@ -1,6 +1,6 @@
 package com.yourrents.services.geodata.repository;
 
-import static org.hamcrest.MatcherAssert.*; 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 import java.util.Optional;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.City;
@@ -21,6 +22,7 @@ import com.yourrents.services.geodata.util.search.FilterCondition;
 import com.yourrents.services.geodata.util.search.FilterCriteria;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 class CityRepositoryTest {
 
@@ -92,5 +94,22 @@ class CityRepositoryTest {
         assertThat(result.localData().itCodiceErariale(), equalTo("A001"));
         assertThat(result.province(), notNullValue());
         assertThat(result.province().name(), equalTo("Padova"));
+    }
+
+    @Test
+    void testFindFirstPageWithOrderByUUIDAsc() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.asc("uuid")));
+        Page<City> result = cityRepository.find(FilterCriteria.of(), pageable);
+        assertThat(result, iterableWithSize(10));
+    }
+
+    @Test
+    void testFindByExternalIdUsingStartsWithOrderByNameAsc() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("name")));
+        FilterCriteria filter = FilterCriteria.of(FilterCondition.of("uuid", "startsWith", "0"));
+        Page<City> result = cityRepository.find(filter, pageable);
+        for (City city : result) {
+            assertThat(city.uuid().toString().startsWith("0"), equalTo(true));
+        }
     }
 }
