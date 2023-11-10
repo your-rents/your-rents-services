@@ -16273,26 +16273,26 @@ COPY yrs_geodata.province_local_data (id, it_codice_istat, it_sigla) FROM stdin;
 \.
 
 COPY yrs_geodata.region (id, name, country_id) FROM stdin;
-1	PIEMONTE	109
-2	VALLE D'AOSTA	109
-3	LOMBARDIA	109
-4	TRENTINO-ALTO ADIGE	109
-5	VENETO	109
-6	FRIULI-VENEZIA GIULIA	109
-7	LIGURIA	109
-8	EMILIA-ROMAGNA	109
-9	TOSCANA	109
-10	UMBRIA	109
-11	MARCHE	109
-12	LAZIO	109
-13	ABRUZZO	109
-14	MOLISE	109
-15	CAMPANIA	109
-16	PUGLIA	109
-17	BASILICATA	109
-18	CALABRIA	109
-19	SICILIA	109
-20	SARDEGNA	109
+1	Piemonte	109
+2	Valle d'Aosta	109
+3	Lombardia	109
+4	Trentino Alto ADIGE	109
+5	Veneto	109
+6	Friuli Venezia Giulia	109
+7	Liguria	109
+8	Emilia Romagna	109
+9	Toscana	109
+10	Umbria	109
+11	Marche	109
+12	Lazio	109
+13	Abruzzo	109
+14	Molise	109
+15	Campania	109
+16	Puglia	109
+17	Basilicata	109
+18	Calabria	109
+19	Sicilia	109
+20	Sardegna	109
 \.
 
 SELECT pg_catalog.setval('yrs_geodata.region_id_seq', 20, true);

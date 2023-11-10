@@ -62,8 +62,4 @@ If you need a fresh database:
      docker volume rm your-rents-services-geodata_postgres-yrs-geodata
      ```
 
-- Then restart the service:
-
-     ```shell
-     docker compose up -d
-     ```
+- Then restart the service
