@@ -1,5 +1,6 @@
 package com.yourrents.services.geodata.controller;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
@@ -27,6 +30,7 @@ import com.yourrents.services.geodata.util.search.FilterCriteria;
 @ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
+@Transactional
 class CityControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -161,4 +165,17 @@ class CityControllerTest {
                 .andExpect(jsonPath("$.province").doesNotExist());
     }
 
+    @Test
+    void testDeleteAnExistingCity() throws Exception {
+        City city = cityRepository.findById(1).get();
+        mvc.perform(delete(basePath + "/cities/" + city.uuid()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        assertThat(cityRepository.findById(1).isPresent(), is(false));
+    }
+
+    @Test
+    void testDeleteANotExistingCity() throws Exception {
+        mvc.perform(delete(basePath + "/cities/" + UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 }

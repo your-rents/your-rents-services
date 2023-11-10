@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yourrents.services.geodata.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
 import com.yourrents.services.geodata.util.JooqUtils;
@@ -98,6 +99,27 @@ public class CityRepository {
                                         .execute();
                 }
                 return findById(cityId).orElseThrow();
+        }
+
+        /**
+         * Delete a city
+         * 
+         * @return true if the city has been deleted, false otherwise
+         * @throws DataNotFoundException if the city does not exist
+         */
+        @Transactional(readOnly = false)
+        public boolean delete(UUID uuid) {
+                Integer cityId = dsl.select(CITY.ID)
+                                .from(CITY)
+                                .where(CITY.EXTERNAL_ID.eq(uuid))
+                                .fetchOptional(CITY.ID).orElseThrow(
+                                                () -> new DataNotFoundException("City not found: " + uuid));
+                dsl.delete(CITY_LOCAL_DATA)
+                                .where(CITY_LOCAL_DATA.ID.eq(cityId))
+                                .execute();
+                return dsl.deleteFrom(CITY)
+                                .where(CITY.ID.eq(cityId))
+                                .execute() > 0;
         }
 
         private SelectOnConditionStep<Record4<UUID, String, CityLocalData, City.Province>> getSelectCitySpec() {
