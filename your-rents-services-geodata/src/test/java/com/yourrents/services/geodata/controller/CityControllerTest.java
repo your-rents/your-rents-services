@@ -127,8 +127,7 @@ class CityControllerTest {
                         {
                             "name": "New City",
                             "province": {
-                                "uuid": "%s",
-                                "name": "Not important"
+                                "uuid": "%s"
                             },
                             "localData": {
                                 "itCodiceIstat": "123456",
