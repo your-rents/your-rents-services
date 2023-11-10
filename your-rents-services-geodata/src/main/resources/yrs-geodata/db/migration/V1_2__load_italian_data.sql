@@ -16276,7 +16276,7 @@ COPY yrs_geodata.region (id, name, country_id) FROM stdin;
 1	Piemonte	109
 2	Valle d'Aosta	109
 3	Lombardia	109
-4	Trentino Alto ADIGE	109
+4	Trentino Alto Adige	109
 5	Veneto	109
 6	Friuli Venezia Giulia	109
 7	Liguria	109
