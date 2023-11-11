@@ -188,6 +188,15 @@ class CityRepositoryTest {
     }
 
     @Test
+    void testCreateNewCityWithNotExistingProvince() {
+        UUID randomUUID = UUID.randomUUID();
+        City newCity = new City(null, "New City", null, new City.Province(randomUUID, null));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> cityRepository.create(newCity));
+        assertThat(ex.getMessage(), equalTo("Province not found: " + randomUUID));
+    }
+
+    @Test
     void testDeleteAnExistingCity() {
         City city = cityRepository.findById(1).get();
         boolean deleted = cityRepository.delete(city.uuid());
@@ -232,6 +241,16 @@ class CityRepositoryTest {
         assertThat(result.name(), equalTo("Updated City"));
         assertThat(result.localData(), equalTo(city.localData()));
         assertThat(result.province(), equalTo(city.province()));
+    }
+
+    @Test
+    void testUpdateACityWithANotExistingProvince() {
+        City city = cityRepository.findById(1).get();
+        UUID randomUUID = UUID.randomUUID();
+        City updatedCity = new City(null, "Updated City", null, new City.Province(randomUUID, null));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> cityRepository.update(city.uuid(), updatedCity));
+        assertThat(ex.getMessage(), equalTo("Province not found: " + randomUUID));
     }
 
     @Test

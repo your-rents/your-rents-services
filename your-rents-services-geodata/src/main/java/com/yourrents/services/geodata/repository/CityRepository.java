@@ -85,7 +85,9 @@ public class CityRepository {
                         provinceId = dsl.select(PROVINCE.ID)
                                         .from(PROVINCE)
                                         .where(PROVINCE.EXTERNAL_ID.eq(city.province().uuid()))
-                                        .fetchOne(PROVINCE.ID);
+                                        .fetchOptional(PROVINCE.ID).orElseThrow(
+                                                        () -> new IllegalArgumentException("Province not found: "
+                                                                        + city.province().uuid()));
                 }
                 Integer cityId = dsl.insertInto(CITY)
                                 .set(CITY.NAME, city.name())
