@@ -14,6 +14,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
+    public static final String DEFAULT_OPERATOR = "containsIgnoreCase";
     private static final Logger log = LoggerFactory.getLogger(SearchableHandlerMethodArgumentResolver.class);
 
     @Override
@@ -37,7 +38,7 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
                 if (!filterNames.contains(name)) {
                     filterNames.add(name);
                     String key = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[key]"), name);
-                    String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[operator]"), "contains");
+                    String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[operator]"), DEFAULT_OPERATOR);
                     String value = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[value]"), "");
                     conditions.add(new FilterCondition(key, operator, value));
                 }

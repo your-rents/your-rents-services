@@ -1,11 +1,14 @@
 package com.yourrents.services.geodata.repository;
 
+import static com.yourrents.services.geodata.jooq.Tables.PROVINCE;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThrows;
 
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,9 +19,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
+import com.yourrents.services.geodata.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.City;
+import com.yourrents.services.geodata.model.CityLocalData;
 import com.yourrents.services.geodata.util.search.FilterCondition;
 import com.yourrents.services.geodata.util.search.FilterCriteria;
 import com.yourrents.services.geodata.util.search.Searchable;
@@ -26,10 +32,13 @@ import com.yourrents.services.geodata.util.search.Searchable;
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
+@Transactional
 class CityRepositoryTest {
 
     @Autowired
     private CityRepository cityRepository;
+    @Autowired
+    private DSLContext dsl;
 
     @Test
     void testFindAll() {
@@ -117,7 +126,8 @@ class CityRepositoryTest {
 
     @Test
     void testFindAllCitiesWithOrderByProvinceNameAscAndCityNameAsc() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("province.name"), Order.asc("name")));
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE,
+                Sort.by(Order.asc("province.name"), Order.asc("name")));
         Page<City> result = cityRepository.find(FilterCriteria.of(), pageable);
         assertThat(result, iterableWithSize(8020));
         assertThat(result.getContent().get(0).name(), equalTo("Agrigento"));
@@ -132,13 +142,12 @@ class CityRepositoryTest {
         assertThat(result, iterableWithSize(96));
         assertThat(result.getContent().get(0).name(), equalTo("Affi"));
         assertThat(result.getContent().get(0).province().name(), equalTo("Verona"));
-    }    
+    }
 
     @Test
     void testFindCitiesByProvinceUuidWithOrderByCityNameAsc() {
         Searchable filterForVerona = FilterCriteria.of(FilterCondition.of("province.name", "eq", "Verona"));
         Page<City> cityInVeronaProvince = cityRepository.find(filterForVerona, PageRequest.ofSize(1));
-
         UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
 
         Searchable filter = FilterCriteria.of(FilterCondition.of("province.uuid", "eq", veronaUuid.toString()));
@@ -147,6 +156,109 @@ class CityRepositoryTest {
         assertThat(result, iterableWithSize(96));
         assertThat(result.getContent().get(0).name(), equalTo("Affi"));
         assertThat(result.getContent().get(0).province().name(), equalTo("Verona"));
-    }    
+    }
+
+    @Test
+    void testCreateNewCityInVeronaProvince() {
+        Searchable filterForVerona = FilterCriteria.of(FilterCondition.of("province.name", "eq", "Verona"));
+        Page<City> cityInVeronaProvince = cityRepository.find(filterForVerona, PageRequest.ofSize(1));
+        UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
+
+        City newCity = new City(null, "New City", new CityLocalData("123456", "1234"),
+                new City.Province(veronaUuid, "Not Important"));
+        City result = cityRepository.create(newCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), notNullValue());
+        assertThat(result.name(), equalTo("New City"));
+        assertThat(result.localData().itCodiceIstat(), equalTo("123456"));
+        assertThat(result.localData().itCodiceErariale(), equalTo("1234"));
+        assertThat(result.province().uuid(), equalTo(veronaUuid));
+        assertThat(result.province().name(), equalTo("Verona"));
+    }
+
+    @Test
+    void testCreateNewCityWithoutProvinceAndLocalData() {
+        City newCity = new City(null, "New City", null, null);
+        City result = cityRepository.create(newCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), notNullValue());
+        assertThat(result.name(), equalTo("New City"));
+        assertThat(result.localData(), nullValue());
+        assertThat(result.province(), nullValue());
+    }
+
+    @Test
+    void testCreateNewCityWithNotExistingProvince() {
+        UUID randomUUID = UUID.randomUUID();
+        City newCity = new City(null, "New City", null, new City.Province(randomUUID, null));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> cityRepository.create(newCity));
+        assertThat(ex.getMessage(), equalTo("Province not found: " + randomUUID));
+    }
+
+    @Test
+    void testDeleteAnExistingCity() {
+        City city = cityRepository.findById(1).get();
+        boolean deleted = cityRepository.delete(city.uuid());
+        assertThat(deleted, equalTo(true));
+        Optional<City> optResult = cityRepository.findById(1);
+        assertThat(optResult.isPresent(), equalTo(false));
+    }
+
+    @Test
+    void testDeleteANonExistingCity() {
+        UUID randomUUID = UUID.randomUUID();
+        DataNotFoundException ex = assertThrows(DataNotFoundException.class, () -> cityRepository.delete(randomUUID));
+        assertThat(ex.getMessage(), equalTo("City not found: " + randomUUID));
+    }
+
+    @Test
+    void testUpdateAnExistingCity() {
+        City city = cityRepository.findById(1).get();
+        UUID newProvinceUuid = dsl.select(PROVINCE.EXTERNAL_ID)
+                .from(PROVINCE)
+                .where(PROVINCE.ID.eq(23)) // 23 is the id of the province of Verona
+                .fetchAny(PROVINCE.EXTERNAL_ID);
+        City updatedCity = new City(null, "Updated City", new CityLocalData("123456", "1234"),
+                new City.Province(newProvinceUuid, null));
+        City result = cityRepository.update(city.uuid(), updatedCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), equalTo(city.uuid()));
+        assertThat(result.name(), equalTo("Updated City"));
+        assertThat(result.localData().itCodiceIstat(), equalTo("123456"));
+        assertThat(result.localData().itCodiceErariale(), equalTo("1234"));
+        assertThat(result.province().uuid(), equalTo(newProvinceUuid));
+        assertThat(result.province().name(), equalTo("Verona"));
+    }
+
+    @Test
+    void testUpdateAnExistingCityWithoutProvinceAndLocalData() {
+        City city = cityRepository.findById(1).get();
+        City updatedCity = new City(null, "Updated City", null, null);
+        City result = cityRepository.update(city.uuid(), updatedCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), equalTo(city.uuid()));
+        assertThat(result.name(), equalTo("Updated City"));
+        assertThat(result.localData(), equalTo(city.localData()));
+        assertThat(result.province(), equalTo(city.province()));
+    }
+
+    @Test
+    void testUpdateACityWithANotExistingProvince() {
+        City city = cityRepository.findById(1).get();
+        UUID randomUUID = UUID.randomUUID();
+        City updatedCity = new City(null, "Updated City", null, new City.Province(randomUUID, null));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> cityRepository.update(city.uuid(), updatedCity));
+        assertThat(ex.getMessage(), equalTo("Province not found: " + randomUUID));
+    }
+
+    @Test
+    void testUpdateANonExistingCity() {
+        UUID randomUUID = UUID.randomUUID();
+        DataNotFoundException ex = assertThrows(DataNotFoundException.class,
+                () -> cityRepository.update(randomUUID, new City(null, "Updated City", null, null)));
+        assertThat(ex.getMessage(), equalTo("City not found: " + randomUUID));
+    }
 
 }

@@ -49,11 +49,11 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions.get("field1")).isNotNull();
         assertThat(conditions.get("field1").getKey()).isEqualTo("field1");
         assertThat(conditions.get("field1").getValue()).isEqualTo("A value for field1");
-        assertThat(conditions.get("field1").getOperator()).isEqualTo("contains");
+        assertThat(conditions.get("field1").getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
         assertThat(conditions.get("field2")).isNotNull();
         assertThat(conditions.get("field2").getKey()).isEqualTo("field2");
         assertThat(conditions.get("field2").getValue()).isEqualTo("A value for field2");
-        assertThat(conditions.get("field2").getOperator()).isEqualTo("contains");
+        assertThat(conditions.get("field2").getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
     }
 
     @Test
