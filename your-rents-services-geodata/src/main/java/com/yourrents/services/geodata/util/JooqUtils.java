@@ -15,8 +15,8 @@ import org.jooq.Table;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.yourrents.services.geodata.util.search.SearchCondition;
-import com.yourrents.services.geodata.util.search.Searchable;
+import com.yourrents.services.common.searchable.SearchCondition;
+import com.yourrents.services.common.searchable.Searchable;
 
 @Service
 public class JooqUtils {

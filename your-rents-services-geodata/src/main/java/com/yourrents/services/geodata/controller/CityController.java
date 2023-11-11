@@ -19,9 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yourrents.services.common.searchable.Searchable;
+
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
-import com.yourrents.services.geodata.util.search.Searchable;
 
 @RestController
 @RequestMapping("${yrs-geodata.api.basepath}/cities")

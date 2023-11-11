@@ -21,13 +21,13 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yourrents.services.common.searchable.FilterCondition;
+import com.yourrents.services.common.searchable.FilterCriteria;
+import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
-import com.yourrents.services.geodata.util.search.FilterCondition;
-import com.yourrents.services.geodata.util.search.FilterCriteria;
-import com.yourrents.services.geodata.util.search.Searchable;
 
 @SpringBootTest
 @ActiveProfiles("test")

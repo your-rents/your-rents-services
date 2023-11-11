@@ -1,9 +1,9 @@
 package com.yourrents.services.geodata.repository;
 
+import com.yourrents.services.common.searchable.FilterCondition;
+import com.yourrents.services.common.searchable.FilterCriteria;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.Province;
-import com.yourrents.services.geodata.util.search.FilterCondition;
-import com.yourrents.services.geodata.util.search.FilterCriteria;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -10,8 +10,10 @@
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<common.spring-boot.version>3.1.5</common.spring-boot.version>
 	</properties>
 	<modules>
+		<module>your-rents-services-common-searchable</module>
 		<module>your-rents-services-geodata</module>
 	</modules>
 </project>
