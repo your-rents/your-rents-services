@@ -22,6 +22,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yourrents.services.geodata.exception.DataNotFoundException;
+import com.yourrents.services.geodata.jooq.tables.records.CityLocalDataRecord;
+import com.yourrents.services.geodata.jooq.tables.records.CityRecord;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
 import com.yourrents.services.geodata.util.JooqUtils;
@@ -120,6 +122,49 @@ public class CityRepository {
                 return dsl.deleteFrom(CITY)
                                 .where(CITY.ID.eq(cityId))
                                 .execute() > 0;
+        }
+
+        /**
+         * Update a city.
+         * 
+         * You can update the name, the province and the local data.
+         * You can't update the city uuid.
+         * You can't update the province data, you can only change the province.
+         * 
+         * Only not null fields are used to update the city.
+         * 
+         * @param uuid the uuid of the city to update
+         * @param city the data of city to update.
+         * @return the updated city
+         * @throws DataNotFoundException if the city does not exist
+         */
+        @Transactional(readOnly = false)
+        public City update(UUID uuid, City city) {
+                CityRecord dbCity = dsl.selectFrom(CITY)
+                                .where(CITY.EXTERNAL_ID.eq(uuid))
+                                .fetchOptional().orElseThrow(
+                                                () -> new DataNotFoundException("City not found: " + uuid));
+                if (city.name() != null) {
+                        dbCity.setName(city.name());
+                }
+                if (city.province() != null) {
+                        Integer provinceId = dsl.select(PROVINCE.ID)
+                                        .from(PROVINCE)
+                                        .where(PROVINCE.EXTERNAL_ID.eq(city.province().uuid()))
+                                        .fetchOptional(PROVINCE.ID).orElseThrow(
+                                                        () -> new IllegalArgumentException("Province not found: "
+                                                                        + city.province().uuid()));
+                        dbCity.setProvinceId(provinceId);
+                }
+                dbCity.update();
+                if (city.localData() != null) {
+                        CityLocalDataRecord localData = dsl.newRecord(CITY_LOCAL_DATA);
+                        localData.setId(dbCity.getId());
+                        localData.setItCodiceIstat(city.localData().itCodiceIstat());
+                        localData.setItCodiceErariale(city.localData().itCodiceErariale());
+                        localData.merge();
+                }
+                return findById(dbCity.getId()).orElseThrow();
         }
 
         private SelectOnConditionStep<Record4<UUID, String, CityLocalData, City.Province>> getSelectCitySpec() {

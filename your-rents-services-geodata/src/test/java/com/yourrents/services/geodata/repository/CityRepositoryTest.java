@@ -1,5 +1,6 @@
 package com.yourrents.services.geodata.repository;
 
+import static com.yourrents.services.geodata.jooq.Tables.PROVINCE;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThrows;
@@ -7,6 +8,7 @@ import static org.junit.Assert.assertThrows;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +37,8 @@ class CityRepositoryTest {
 
     @Autowired
     private CityRepository cityRepository;
+    @Autowired
+    private DSLContext dsl;
 
     @Test
     void testFindAll() {
@@ -198,4 +202,44 @@ class CityRepositoryTest {
         DataNotFoundException ex = assertThrows(DataNotFoundException.class, () -> cityRepository.delete(randomUUID));
         assertThat(ex.getMessage(), equalTo("City not found: " + randomUUID));
     }
+
+    @Test
+    void testUpdateAnExistingCity() {
+        City city = cityRepository.findById(1).get();
+        UUID newProvinceUuid = dsl.select(PROVINCE.EXTERNAL_ID)
+                .from(PROVINCE)
+                .where(PROVINCE.ID.eq(23)) // 23 is the id of the province of Verona
+                .fetchAny(PROVINCE.EXTERNAL_ID);
+        City updatedCity = new City(null, "Updated City", new CityLocalData("123456", "1234"),
+                new City.Province(newProvinceUuid, null));
+        City result = cityRepository.update(city.uuid(), updatedCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), equalTo(city.uuid()));
+        assertThat(result.name(), equalTo("Updated City"));
+        assertThat(result.localData().itCodiceIstat(), equalTo("123456"));
+        assertThat(result.localData().itCodiceErariale(), equalTo("1234"));
+        assertThat(result.province().uuid(), equalTo(newProvinceUuid));
+        assertThat(result.province().name(), equalTo("Verona"));
+    }
+
+    @Test
+    void testUpdateAnExistingCityWithoutProvinceAndLocalData() {
+        City city = cityRepository.findById(1).get();
+        City updatedCity = new City(null, "Updated City", null, null);
+        City result = cityRepository.update(city.uuid(), updatedCity);
+        assertThat(result, notNullValue());
+        assertThat(result.uuid(), equalTo(city.uuid()));
+        assertThat(result.name(), equalTo("Updated City"));
+        assertThat(result.localData(), equalTo(city.localData()));
+        assertThat(result.province(), equalTo(city.province()));
+    }
+
+    @Test
+    void testUpdateANonExistingCity() {
+        UUID randomUUID = UUID.randomUUID();
+        DataNotFoundException ex = assertThrows(DataNotFoundException.class,
+                () -> cityRepository.update(randomUUID, new City(null, "Updated City", null, null)));
+        assertThat(ex.getMessage(), equalTo("City not found: " + randomUUID));
+    }
+
 }
