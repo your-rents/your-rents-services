@@ -89,20 +89,18 @@ public class CityRepository {
                                                         () -> new IllegalArgumentException("Province not found: "
                                                                         + city.province().uuid()));
                 }
-                Integer cityId = dsl.insertInto(CITY)
-                                .set(CITY.NAME, city.name())
-                                .set(CITY.PROVINCE_ID, provinceId)
-                                .returning(CITY.ID)
-                                .fetchOne()
-                                .getId();
+                CityRecord newCity = dsl.newRecord(CITY);
+                newCity.setName(city.name());
+                newCity.setProvinceId(provinceId);
+                newCity.insert();
                 if (city.localData() != null) {
-                        dsl.insertInto(CITY_LOCAL_DATA)
-                                        .set(CITY_LOCAL_DATA.ID, cityId)
-                                        .set(CITY_LOCAL_DATA.IT_CODICE_ISTAT, city.localData().itCodiceIstat())
-                                        .set(CITY_LOCAL_DATA.IT_CODICE_ERARIALE, city.localData().itCodiceErariale())
-                                        .execute();
+                        CityLocalDataRecord newLocalData = dsl.newRecord(CITY_LOCAL_DATA);
+                        newLocalData.setId(newCity.getId());
+                        newLocalData.setItCodiceIstat(city.localData().itCodiceIstat());
+                        newLocalData.setItCodiceErariale(city.localData().itCodiceErariale());
+                        newLocalData.insert();
                 }
-                return findById(cityId).orElseThrow();
+                return findById(newCity.getId()).orElseThrow();
         }
 
         /**
