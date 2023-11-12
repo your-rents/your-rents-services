@@ -1,4 +1,4 @@
-package com.yourrents.services.geodata.util.search;
+package com.yourrents.services.common.searchable;
 
 public interface SearchCondition<K, O, V> {
     K getKey();

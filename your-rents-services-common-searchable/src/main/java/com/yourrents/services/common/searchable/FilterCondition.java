@@ -1,4 +1,4 @@
-package com.yourrents.services.geodata.util.search;
+package com.yourrents.services.common.searchable;
 
 public class FilterCondition implements SearchCondition<String, String, String> {
     private String field;

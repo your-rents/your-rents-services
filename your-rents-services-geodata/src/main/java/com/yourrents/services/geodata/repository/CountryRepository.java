@@ -4,9 +4,10 @@ import static com.yourrents.services.geodata.jooq.Tables.CONTINENT;
 import static com.yourrents.services.geodata.jooq.Tables.COUNTRY;
 import static org.jooq.Records.mapping;
 
+import com.yourrents.services.common.searchable.FilterCriteria;
+import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.model.Country;
-import com.yourrents.services.geodata.util.JooqUtils;
-import com.yourrents.services.geodata.util.search.FilterCriteria;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

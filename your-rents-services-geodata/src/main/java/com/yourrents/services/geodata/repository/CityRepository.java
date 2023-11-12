@@ -21,13 +21,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yourrents.services.geodata.exception.DataNotFoundException;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
+import com.yourrents.services.common.util.jooq.JooqUtils;
+import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.geodata.jooq.tables.records.CityLocalDataRecord;
 import com.yourrents.services.geodata.jooq.tables.records.CityRecord;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
-import com.yourrents.services.geodata.util.JooqUtils;
-import com.yourrents.services.geodata.util.search.Searchable;
 
 @Repository
 @Transactional(readOnly = true)

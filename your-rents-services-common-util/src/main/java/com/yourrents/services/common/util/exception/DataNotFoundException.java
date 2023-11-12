@@ -1,4 +1,4 @@
-package com.yourrents.services.geodata.exception;
+package com.yourrents.services.common.util.exception;
 
 public class DataNotFoundException extends RuntimeException{
 

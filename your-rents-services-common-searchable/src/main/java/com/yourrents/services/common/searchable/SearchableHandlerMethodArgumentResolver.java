@@ -1,4 +1,4 @@
-package com.yourrents.services.geodata.util.search;
+package com.yourrents.services.common.searchable;
 
 import java.util.ArrayList;
 import java.util.List;
