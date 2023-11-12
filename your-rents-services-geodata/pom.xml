@@ -25,6 +25,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.yourrents.services</groupId>
+			<artifactId>your-rents-services-common-util</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.yourrents.services</groupId>
 			<artifactId>your-rents-services-common-searchable</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

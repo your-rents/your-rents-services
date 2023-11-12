@@ -24,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
-import com.yourrents.services.geodata.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
 

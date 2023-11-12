@@ -1,6 +1,5 @@
-package com.yourrents.services.geodata.util;
+package com.yourrents.services.common.util.exception;
 
-import com.yourrents.services.geodata.exception.DataNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(DataNotFoundException.class)
 	public ResponseEntity<Object> dataNotFound(DataNotFoundException e, NativeWebRequest request) {

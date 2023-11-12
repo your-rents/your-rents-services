@@ -1,4 +1,4 @@
-package com.yourrents.services.geodata.util;
+package com.yourrents.services.common.util.jooq;
 
 import static org.jooq.impl.DSL.*;
 

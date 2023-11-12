@@ -1,7 +1,7 @@
 package com.yourrents.services.geodata.controller;
 
 import com.yourrents.services.common.searchable.Searchable;
-import com.yourrents.services.geodata.exception.DataNotFoundException;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.repository.ProvinceRepository;
 import org.springdoc.core.annotations.ParameterObject;

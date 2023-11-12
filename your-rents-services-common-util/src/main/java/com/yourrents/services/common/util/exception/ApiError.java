@@ -1,4 +1,4 @@
-package com.yourrents.services.geodata.util;
+package com.yourrents.services.common.util.exception;
 
 import java.time.LocalDateTime;
 

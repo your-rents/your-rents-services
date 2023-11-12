@@ -1,6 +1,6 @@
 package com.yourrents.services.geodata.controller;
 
-import com.yourrents.services.geodata.exception.DataNotFoundException;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.Continent;
 import com.yourrents.services.geodata.repository.ContinentRepository;
 import java.util.UUID;

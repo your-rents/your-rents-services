@@ -1,8 +1,9 @@
 package com.yourrents.services.geodata.repository;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.model.Province;
-import com.yourrents.services.geodata.util.JooqUtils;
+
 import org.jooq.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

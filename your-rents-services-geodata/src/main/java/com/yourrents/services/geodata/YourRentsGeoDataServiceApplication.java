@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
+import com.yourrents.services.common.util.exception.GlobalExceptionHandler;
+import com.yourrents.services.common.util.jooq.JooqUtils;
 
 @SpringBootApplication
 public class YourRentsGeoDataServiceApplication {
@@ -18,4 +20,13 @@ public class YourRentsGeoDataServiceApplication {
 		return new SearchableArgumentResolverConfigurer();
 	}
 
+	@Bean
+	public GlobalExceptionHandler globalExceptionHandler() {
+		return new GlobalExceptionHandler();
+	}
+
+	@Bean
+	public JooqUtils jooqUtils() {
+		return new JooqUtils();
+	}
 }
