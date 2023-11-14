@@ -132,9 +132,13 @@
 				<version>${spring-boot.version}</version>
 				<executions>
 					<execution>
+						<id>repackage</id>
 						<goals>
 							<goal>repackage</goal>
 						</goals>
+						<configuration>
+							<attach>false</attach>
+						</configuration>
 					</execution>
 				</executions>				
 			</plugin>
