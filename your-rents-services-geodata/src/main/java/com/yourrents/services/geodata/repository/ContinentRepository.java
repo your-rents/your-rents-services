@@ -4,6 +4,7 @@ import static com.yourrents.services.geodata.jooq.Tables.CONTINENT;
 import static org.jooq.Records.mapping;
 
 import com.yourrents.services.geodata.model.Continent;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -20,26 +21,34 @@ public class ContinentRepository {
 		this.dsl = dsl;
 	}
 
+	public List<Continent> findAll() {
+		return getSelectContinentSpec()
+				.orderBy(CONTINENT.ID.asc())
+				.fetch()
+				.map(mapping(Continent::new));
+	}
+
 	public Optional<Continent> findById(Integer id) {
-		return getSelectedCountries()
+		return getSelectContinentSpec()
 				.where(CONTINENT.ID.eq(id))
 				.fetchOptional()
 				.map(mapping(Continent::new));
 	}
 
 	public Optional<Continent> findByExternalId(UUID externalId) {
-		return getSelectedCountries()
+		return getSelectContinentSpec()
 				.where(CONTINENT.EXTERNAL_ID.eq(externalId))
 				.fetchOptional()
 				.map(mapping(Continent::new));
 	}
 
-	private SelectJoinStep<Record3<String, String, UUID>> getSelectedCountries() {
+	private SelectJoinStep<Record3<String, String, UUID>> getSelectContinentSpec() {
 		return dsl.select(
 						CONTINENT.CODE.as("code"),
 						CONTINENT.NAME.as("name"),
 						CONTINENT.EXTERNAL_ID.as("uuid"))
 				.from(CONTINENT);
+
 	}
 
 }

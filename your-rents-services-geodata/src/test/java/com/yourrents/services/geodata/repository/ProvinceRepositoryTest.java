@@ -1,5 +1,12 @@
 package com.yourrents.services.geodata.repository;
 
+import static com.yourrents.services.geodata.util.search.PaginationUtils.lastPage;
+import static com.yourrents.services.geodata.util.search.PaginationUtils.numRecordsInPage;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.notNullValue;
+
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
@@ -15,11 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 
-import static com.yourrents.services.geodata.util.search.PaginationUtils.lastPage;
-import static com.yourrents.services.geodata.util.search.PaginationUtils.numRecordsInPage;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
@@ -32,14 +34,14 @@ class ProvinceRepositoryTest {
 	ProvinceRepository provinceRepository;
 
 	@Test
-	void testFindAll() {
+	void findAll() {
 		Page<Province> result = provinceRepository.find(FilterCriteria.of(),
 				PageRequest.ofSize(Integer.MAX_VALUE));
 		assertThat(result, iterableWithSize(NUM_PROVINCES));
 	}
 
 	@Test
-	void testFindFirstPageWithOrderByNameAsc() {
+	void findFirstPageWithOrderByNameAsc() {
 		Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by(Order.asc("name")));
 		Page<Province> page = provinceRepository.find(FilterCriteria.of(), pageable);
 		assertThat(page, iterableWithSize(5));
@@ -50,7 +52,7 @@ class ProvinceRepositoryTest {
 	}
 
 	@Test
-	void testFindFirstPageWithOrderByNameDesc() {
+	void findFirstPageWithOrderByNameDesc() {
 		Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by(Order.desc("name")));
 		Page<Province> result = provinceRepository.find(FilterCriteria.of(), pageable);
 		assertThat(result, iterableWithSize(PAGE_SIZE));
@@ -59,7 +61,7 @@ class ProvinceRepositoryTest {
 	}
 
 	@Test
-	void testFindLastPageWithOrderByNameAsc() {
+	void findLastPageWithOrderByNameAsc() {
 		final int lastPage = lastPage(NUM_PROVINCES, PAGE_SIZE);
 		final int numRecordsForPage = numRecordsInPage(NUM_PROVINCES, PAGE_SIZE, lastPage);
 		Pageable pageable = PageRequest.of(lastPage, PAGE_SIZE, Sort.by(Order.asc("name")));
@@ -71,7 +73,7 @@ class ProvinceRepositoryTest {
 	}
 
 	@Test
-	void testFindFilteredByNameEqualsWithOrderByNameAsc() {
+	void findFilteredByNameEqualsWithOrderByNameAsc() {
 		Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by(Order.asc("name")));
 		FilterCriteria filter = FilterCriteria.of(FilterCondition.of("name", "eq", "Venezia"));
 		Page<Province> result = provinceRepository.find(filter, pageable);
@@ -80,7 +82,7 @@ class ProvinceRepositoryTest {
 	}
 
 	@Test
-	void testFindFilteredByNameContainsIgnoreCaseWithOrderByNameAsc() {
+	void findFilteredByNameContainsIgnoreCaseWithOrderByNameDesc() {
 		Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.desc("name")));
 		FilterCriteria filter = FilterCriteria.of(
 				FilterCondition.of("name", "containsIgnoreCase", "AV"));
@@ -90,7 +92,7 @@ class ProvinceRepositoryTest {
 	}
 
 	@Test
-	void testFindByExternalId() {
+	void findByExternalId() {
 		Province expected = provinceRepository.findById(1).orElseThrow(RuntimeException::new);
 		Province province = provinceRepository.findByExternalId(expected.uuid())
 				.orElseThrow(RuntimeException::new);
@@ -98,6 +100,9 @@ class ProvinceRepositoryTest {
 		assertThat(province, notNullValue());
 		assertThat(province.uuid(), equalTo(expected.uuid()));
 		assertThat(province.name(), equalTo("Torino"));
+		assertThat(province.localData().itCodiceIstat(), equalTo("1"));
+		assertThat(province.localData().itSigla(), equalTo("TO"));
+		assertThat(province.localData().itCodiceIstat(), equalTo("1"));
 		assertThat(province.region().name(), equalTo("Piemonte"));
 	}
 
