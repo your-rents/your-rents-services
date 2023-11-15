@@ -1,5 +1,13 @@
 package com.yourrents.services.geodata.controller;
 
+import static com.yourrents.services.geodata.util.search.PaginationUtils.numOfPages;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.repository.ProvinceRepository;
@@ -11,12 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static com.yourrents.services.geodata.util.search.PaginationUtils.numOfPages;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
@@ -32,7 +34,7 @@ class ProvinceControllerTest {
 	String basePath;
 
 	@Test
-	void testGetAllProvinces() throws Exception {
+	void getAllProvinces() throws Exception {
 		mvc.perform(get(basePath + PROVINCE_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("page", "0")
@@ -55,7 +57,7 @@ class ProvinceControllerTest {
 	}
 
 	@Test
-	void testGetProvincesWithDefaultPagination() throws Exception {
+	void getProvincesWithDefaultPagination() throws Exception {
 		mvc.perform(get(basePath + PROVINCE_URL)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -75,7 +77,7 @@ class ProvinceControllerTest {
 	}
 
 	@Test
-	void testGetProvincesWithOrderNameDesc() throws Exception {
+	void getProvincesWithOrderNameDesc() throws Exception {
 		mvc.perform(get(basePath + PROVINCE_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("sort", "name,DESC"))
@@ -96,7 +98,30 @@ class ProvinceControllerTest {
 	}
 
 	@Test
-	void testGetByUuid() throws Exception {
+	void searchProvincesByNameWithDefaultOperator() throws Exception {
+		mvc.perform(get(basePath + PROVINCE_URL)
+						.contentType(MediaType.APPLICATION_JSON)
+						.param("filter[name][value]", "Venezia")
+						.param("page", "0")
+						.param("size", Integer.toString(Integer.MAX_VALUE)))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.content", hasSize(1)))
+				.andExpect(jsonPath("$.content[0].name", is("Venezia")))
+				.andExpect(jsonPath("$.totalPages", is(1)))
+				.andExpect(jsonPath("$.totalElements", is(1)))
+				.andExpect(jsonPath("$.last", is(true)))
+				.andExpect(jsonPath("$.first", is(true)))
+				.andExpect(jsonPath("$.size", is(Integer.MAX_VALUE)))
+				.andExpect(jsonPath("$.number", is(0)))
+				.andExpect(jsonPath("$.numberOfElements", is(1)))
+				.andExpect(jsonPath("$.empty", is(false)))
+				.andExpect(jsonPath("$.sort.sorted", is(true)));
+	}
+
+	@Test
+	void getByUuid() throws Exception {
 		Province expected = provinceRepository.findById(1)
 				.orElseThrow(RuntimeException::new);
 		mvc.perform(get(basePath + PROVINCE_URL + "/" + expected.uuid()).contentType(MediaType.APPLICATION_JSON))
@@ -104,6 +129,8 @@ class ProvinceControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.name", is("Torino")))
 				.andExpect(jsonPath("$.uuid", is(expected.uuid().toString())))
+				.andExpect(jsonPath("$.localData.itCodiceIstat", is("1")))
+				.andExpect(jsonPath("$.localData.itSigla", is("TO")))
 				.andExpect(jsonPath("$.region").exists())
 				.andExpect(jsonPath("$.region.name", is("Piemonte")))
 				.andExpect(jsonPath("$.region.uuid").exists());

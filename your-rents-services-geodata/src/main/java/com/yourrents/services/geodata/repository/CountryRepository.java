@@ -2,12 +2,13 @@ package com.yourrents.services.geodata.repository;
 
 import static com.yourrents.services.geodata.jooq.Tables.CONTINENT;
 import static com.yourrents.services.geodata.jooq.Tables.COUNTRY;
+import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.Records.mapping;
+import static org.jooq.impl.DSL.row;
 
-import com.yourrents.services.common.searchable.FilterCriteria;
+import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.model.Country;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,42 +34,44 @@ public class CountryRepository {
 		this.jooqUtils = jooqUtils;
 	}
 
-	public Page<Country> find(Pageable pageable) {
+	public Page<Country> find(Searchable filter, Pageable pageable) {
 		Select<?> result = jooqUtils.paginate(
 				dsl,
-                jooqUtils.getQueryWithConditionsAndSorts(getSelectedCountries(),
-                        FilterCriteria.of(), s -> null,
-                        pageable, this::getSupportedSortField),
+				jooqUtils.getQueryWithConditionsAndSorts(getSelectCountrySpec(),
+						filter, this::getSupportedSortField,
+						pageable, this::getSupportedSortField),
 				pageable.getPageSize(), pageable.getOffset());
-
-		List<Country> countries = result.fetch(r -> new Country(
-				r.get("uuid", UUID.class),
-				r.get("isoCode", String.class),
-				r.get("englishFullName", String.class),
-				r.get("iso3", String.class),
-				r.get("localName", String.class),
-				r.get("number", Integer.class),
-				r.get("continentUuid", UUID.class)));
+		List<Country> countries = result.fetch(r ->
+				new Country(
+						r.get("uuid", UUID.class),
+						r.get("isoCode", String.class),
+						r.get("englishFullName", String.class),
+						r.get("iso3", String.class),
+						r.get("localName", String.class),
+						r.get("number", Integer.class),
+						r.get("continent", Country.Continent.class))
+		);
 		int totalRows = Objects.requireNonNullElse(
 				result.fetchAny("total_rows", Integer.class), 0);
 		return new PageImpl<>(countries, pageable, totalRows);
 	}
 
+
 	public Optional<Country> findById(Integer id) {
-		return getSelectedCountries()
+		return getSelectCountrySpec()
 				.where(COUNTRY.ID.eq(id))
 				.fetchOptional()
 				.map(mapping(Country::new));
 	}
 
 	public Optional<Country> findByExternalId(UUID externalId) {
-		return getSelectedCountries()
+		return getSelectCountrySpec()
 				.where(COUNTRY.EXTERNAL_ID.eq(externalId))
 				.fetchOptional()
 				.map(mapping(Country::new));
 	}
 
-	private SelectOnConditionStep<Record7<UUID, String, String, String, String, Integer, UUID>> getSelectedCountries() {
+	private SelectOnConditionStep<Record7<UUID, String, String, String, String, Integer, Country.Continent>> getSelectCountrySpec() {
 		return dsl.select(
 						COUNTRY.EXTERNAL_ID.as("uuid"),
 						COUNTRY.ISO_CODE.as("isoCode"),
@@ -76,14 +79,20 @@ public class CountryRepository {
 						COUNTRY.ISO_3.as("iso3"),
 						COUNTRY.LOCAL_NAME.as("localName"),
 						COUNTRY.NUMBER.as("number"),
-						CONTINENT.EXTERNAL_ID.as("continentUuid"))
+						row(CONTINENT.EXTERNAL_ID, CONTINENT.NAME)
+								.mapping(nullOnAllNull(Country.Continent::new)).as("continent"))
 				.from(COUNTRY).leftJoin(CONTINENT)
 				.on(COUNTRY.CONTINENT_ID.eq(CONTINENT.ID));
 	}
 
     private Field<?> getSupportedSortField(String field) {
         return switch (field) {
-            case "number" -> COUNTRY.NUMBER;
+			case "uuid" -> COUNTRY.EXTERNAL_ID.cast(String.class);
+			case "isoCode" -> COUNTRY.ISO_CODE;
+			case "englishFullName" -> COUNTRY.ENGLISH_FULL_NAME;
+			case "iso3" -> COUNTRY.ISO_3;
+			case "localName" -> COUNTRY.LOCAL_NAME;
+			case "number" -> COUNTRY.NUMBER.cast(String.class);
             default ->
                 throw new IllegalArgumentException(
                         "Unexpected value for filter/sort field: " + field);

@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
-import com.yourrents.services.geodata.model.Country;
-import com.yourrents.services.geodata.repository.CountryRepository;
+import com.yourrents.services.geodata.model.Region;
+import com.yourrents.services.geodata.repository.RegionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,52 +23,53 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
-class CountryControllerTest {
+class RegionControllerTest {
 
-	static final int NUM_COUNTRIES = 246;
-
-	final static String COUNTRY_URL = "/countries";
+	static final int NUM_REGIONS = 20;
+	final static String REGION_URL = "/regions";
 	@Autowired
-	private MockMvc mvc;
+	MockMvc mvc;
 	@Autowired
-	private CountryRepository countryRepository;
+	RegionRepository regionRepository;
 	@Value("${yrs-geodata.api.basepath}")
-	private String basePath;
+	String basePath;
+
 	@Test
-	void getAllCountries() throws Exception {
-		mvc.perform(get(basePath + COUNTRY_URL)
+	void getAllRegions() throws Exception {
+		mvc.perform(get(basePath + REGION_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("page", "0")
 						.param("size", "2147483647"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.content").isArray())
-				.andExpect(jsonPath("$.content", hasSize(NUM_COUNTRIES)))
-				.andExpect(jsonPath("$.content[0].localName", is("Afghanistan")))
+				.andExpect(jsonPath("$.content", hasSize(NUM_REGIONS)))
+				.andExpect(jsonPath("$.content[0].name", is("Abruzzo")))
+				.andExpect(jsonPath("$.content[0].country.localName", is("Italy")))
 				.andExpect(jsonPath("$.totalPages", is(1)))
-				.andExpect(jsonPath("$.totalElements", is(NUM_COUNTRIES)))
+				.andExpect(jsonPath("$.totalElements", is(NUM_REGIONS)))
 				.andExpect(jsonPath("$.last", is(true)))
 				.andExpect(jsonPath("$.first", is(true)))
 				.andExpect(jsonPath("$.size", is(2147483647)))
 				.andExpect(jsonPath("$.number", is(0)))
-				.andExpect(jsonPath("$.numberOfElements", is(NUM_COUNTRIES)))
+				.andExpect(jsonPath("$.numberOfElements", is(NUM_REGIONS)))
 				.andExpect(jsonPath("$.empty", is(false)))
 				.andExpect(jsonPath("$.sort.sorted", is(true)));
 	}
 
 	@Test
 	void getAllRegionsWithDefaultPagination() throws Exception {
-		mvc.perform(get(basePath + COUNTRY_URL)
+		mvc.perform(get(basePath + REGION_URL)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.content").isArray())
 				.andExpect(jsonPath("$.content", hasSize(20)))
-				.andExpect(jsonPath("$.content[0].localName", is("Afghanistan")))
-				.andExpect(jsonPath("$.content[19].localName", is("Barbados")))
-				.andExpect(jsonPath("$.totalPages", is(numOfPages(NUM_COUNTRIES, 20))))
-				.andExpect(jsonPath("$.totalElements", is(NUM_COUNTRIES)))
-				.andExpect(jsonPath("$.last", is(false)))
+				.andExpect(jsonPath("$.content[0].name", is("Abruzzo")))
+				.andExpect(jsonPath("$.content[19].name", is("Veneto")))
+				.andExpect(jsonPath("$.totalPages", is(numOfPages(NUM_REGIONS, 20))))
+				.andExpect(jsonPath("$.totalElements", is(NUM_REGIONS)))
+				.andExpect(jsonPath("$.last", is(true)))
 				.andExpect(jsonPath("$.first", is(true)))
 				.andExpect(jsonPath("$.size", is(20)))
 				.andExpect(jsonPath("$.number", is(0)))
@@ -79,20 +80,16 @@ class CountryControllerTest {
 
 	@Test
 	void getByUuid() throws Exception {
-		Country expected = countryRepository.findById(1)
+		Region expected = regionRepository.findById(1)
 				.orElseThrow(RuntimeException::new);
-		mvc.perform(get(basePath + COUNTRY_URL + "/" +
-						expected.uuid()).contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(get(basePath + REGION_URL + "/" + expected.uuid()).contentType(
+						MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.name", is("Piemonte")))
 				.andExpect(jsonPath("$.uuid", is(expected.uuid().toString())))
-				.andExpect(jsonPath("$.isoCode", is("AD")))
-				.andExpect(jsonPath("$.englishFullName", is("Principality of Andorra")))
-				.andExpect(jsonPath("$.iso3", is("AND")))
-				.andExpect(jsonPath("$.localName", is("Andorra")))
-				.andExpect(jsonPath("$.number", is(20)))
-				.andExpect(jsonPath("$.continent.name", is("Europe")));
+				.andExpect(jsonPath("$.localData.itCodiceIstat", is("1")))
+				.andExpect(jsonPath("$.country.localName", is("Italy")))
+				.andExpect(jsonPath("$.country.uuid").exists());
 	}
-
-
 }

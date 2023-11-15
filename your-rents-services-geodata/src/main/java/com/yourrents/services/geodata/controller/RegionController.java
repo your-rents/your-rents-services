@@ -2,8 +2,8 @@ package com.yourrents.services.geodata.controller;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import com.yourrents.services.geodata.model.Country;
-import com.yourrents.services.geodata.repository.CountryRepository;
+import com.yourrents.services.geodata.model.Region;
+import com.yourrents.services.geodata.repository.RegionRepository;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -17,31 +17,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${yrs-geodata.api.basepath}/countries")
-class CountryController {
+@RequestMapping("${yrs-geodata.api.basepath}/regions")
+class RegionController {
 
-    private final CountryRepository countryRepository;
+	private final RegionRepository regionRepository;
 
-	CountryController(CountryRepository countryRepository) {
-		this.countryRepository = countryRepository;
+	RegionController(RegionRepository regionRepository) {
+		this.regionRepository = regionRepository;
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<Country>> getCountries(
+	public ResponseEntity<Page<Region>> getRegions(
 			Searchable filter,
-			@ParameterObject @SortDefault(sort = "localName", direction = Direction.ASC) Pageable pagination) {
-		Page<Country> page = countryRepository.find(filter, pagination);
+			@ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
+		Page<Region> page = regionRepository.find(filter, pagination);
 		return ResponseEntity.ok(page);
 	}
 
 	@GetMapping("/{uuid}")
-    public ResponseEntity<Country> getByUuid(@PathVariable UUID uuid) {
-		Country country = countryRepository.findByExternalId(uuid)
+	public ResponseEntity<Region> getByUuid(@PathVariable UUID uuid) {
+		Region region = regionRepository.findByExternalId(uuid)
 				.orElseThrow(
-						() -> new DataNotFoundException("can't find country having uuid: " + uuid));
-		return ResponseEntity.ok(country);
+						() -> new DataNotFoundException("can't find region having uuid: " + uuid));
+		return ResponseEntity.ok(region);
 	}
-
-
 
 }

@@ -3,6 +3,7 @@ package com.yourrents.services.geodata.controller;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.model.Continent;
 import com.yourrents.services.geodata.repository.ContinentRepository;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,12 @@ class ContinentController {
 						() -> new DataNotFoundException(
 								"can't find continent having uuid: " + uuid));
 		return ResponseEntity.ok(continent);
+	}
+
+	@GetMapping()
+	public ResponseEntity<List<Continent>> getAll() {
+		List<Continent> list = continentRepository.findAll();
+		return ResponseEntity.ok(list);
 	}
 
 }
