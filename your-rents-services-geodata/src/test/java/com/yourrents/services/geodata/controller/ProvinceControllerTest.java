@@ -1,5 +1,6 @@
 package com.yourrents.services.geodata.controller;
 
+
 import static com.yourrents.services.geodata.util.search.PaginationUtils.numOfPages;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
