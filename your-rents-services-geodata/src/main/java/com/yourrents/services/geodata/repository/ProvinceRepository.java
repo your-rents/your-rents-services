@@ -107,8 +107,8 @@ public class ProvinceRepository {
 	/**
 	 * Delete a province
 	 *
-	 * @return true if the city has been deleted, false otherwise
-	 * @throws DataNotFoundException if the city does not exist
+	 * @return true if the province has been deleted, false otherwise
+	 * @throws DataNotFoundException if the province does not exist
 	 */
 	@Transactional(readOnly = false)
 	public boolean delete(UUID uuid) {

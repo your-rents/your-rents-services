@@ -33,7 +33,7 @@ class ProvinceController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<Province>> getCities(
+	public ResponseEntity<Page<Province>> getProvinces(
 			Searchable filter,
 			@ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
 		Page<Province> page = provinceRepository.find(filter, pagination);
