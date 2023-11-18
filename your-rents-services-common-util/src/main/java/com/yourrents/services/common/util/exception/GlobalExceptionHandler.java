@@ -18,7 +18,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> sQLException(Exception e, NativeWebRequest request) {
+	public ResponseEntity<Object> exception(Exception e, NativeWebRequest request) {
 		logger.error(e.getMessage(), e);
 		return super.handleExceptionInternal(e,
 				buildErrorResponse("Internal Server Error", e, request,
