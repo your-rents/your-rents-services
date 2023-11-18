@@ -1,5 +1,6 @@
 package com.yourrents.services.geodata.controller;
 
+
 import static com.yourrents.services.geodata.util.search.PaginationUtils.numOfPages;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -18,11 +19,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
+@Transactional
 class ProvinceControllerTest {
 	static final int NUM_PROVINCES = 107;
 	final static String PROVINCE_URL = "/provinces";
