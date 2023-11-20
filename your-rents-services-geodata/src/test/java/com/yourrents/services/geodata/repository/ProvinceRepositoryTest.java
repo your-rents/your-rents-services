@@ -21,10 +21,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
+@Transactional
 class ProvinceRepositoryTest {
 
 	static final int NUM_PROVINCES = 107;
