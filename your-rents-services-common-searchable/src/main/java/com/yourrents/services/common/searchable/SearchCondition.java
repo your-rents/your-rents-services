@@ -1,7 +1,7 @@
 package com.yourrents.services.common.searchable;
 
 public interface SearchCondition<K, O, V> {
-    K getKey();
+    K getField();
     O getOperator();
     V getValue();
 }

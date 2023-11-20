@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yourrents.services.common.searchable.Searchable;
-
+import com.yourrents.services.common.searchable.annotation.SearchableDefault;
+import com.yourrents.services.common.searchable.annotation.SearchableField;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
 
@@ -32,7 +33,8 @@ class CityController {
 
     @GetMapping
     public Page<City> getCities(
-            Searchable filter,
+            @ParameterObject @SearchableDefault({ @SearchableField(name = "uuid"), @SearchableField("name"),
+                    @SearchableField("province.name") }) Searchable filter,
             @ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
         return cityRepository.find(filter, pagination);
     }

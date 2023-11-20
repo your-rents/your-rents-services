@@ -25,22 +25,26 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
     @Override
     public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+        String filterPrefix = "filter.";
         List<FilterCondition> conditions = new ArrayList<FilterCondition>();
-        List<String> filterNames = new ArrayList<String>();
+        List<String> filterKeys = new ArrayList<String>();
         webRequest.getParameterMap().forEach((k, v) -> {
-            if (k.startsWith("filter[")) {
-                int nameEndDelimiter = k.indexOf(']', 7);
-                if (nameEndDelimiter < 0) {
+            if (k.startsWith(filterPrefix)) {
+                int keyEndDelimiter = k.lastIndexOf('.');
+                if (keyEndDelimiter < filterPrefix.length()) {
                     throw new IllegalArgumentException("Invalid filter parameter: " + k);
                 }
-                String filterBase = k.substring(0, nameEndDelimiter + 1);
-                String name = filterBase.substring(7, filterBase.length() - 1);
-                if (!filterNames.contains(name)) {
-                    filterNames.add(name);
-                    String key = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[key]"), name);
-                    String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[operator]"), DEFAULT_OPERATOR);
-                    String value = Objects.requireNonNullElse(webRequest.getParameter(filterBase + "[value]"), "");
-                    conditions.add(new FilterCondition(key, operator, value));
+                String filterBase = k.substring(0, keyEndDelimiter);
+                String key = filterBase.substring(filterPrefix.length(), filterBase.length());
+                if (!filterKeys.contains(key)) {
+                    log.debug("Found filter parameter: {}", k);
+                    log.debug("Extracted filter base: {}", filterBase);
+                    log.debug("Extracted filter key: {}", key);
+                    filterKeys.add(key);
+                    String field = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".field"), key);
+                    String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".operator"), DEFAULT_OPERATOR);
+                    String value = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".value"), "");
+                    conditions.add(new FilterCondition(field, operator, value));
                 }
             }
         });

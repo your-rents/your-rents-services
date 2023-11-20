@@ -106,7 +106,7 @@ class ProvinceControllerTest {
 	void searchProvincesByNameWithDefaultOperator() throws Exception {
 		mvc.perform(get(basePath + PROVINCE_URL)
 						.contentType(MediaType.APPLICATION_JSON)
-						.param("filter[name][value]", "Venezia")
+						.param("filter.name.value", "Venezia")
 						.param("page", "0")
 						.param("size", Integer.toString(Integer.MAX_VALUE)))
 				.andExpect(status().isOk())

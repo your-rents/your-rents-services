@@ -1,8 +1,8 @@
 package com.yourrents.services.geodata.controller;
 
-
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,12 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.yourrents.services.common.searchable.FilterCondition;
-import com.yourrents.services.common.searchable.FilterCriteria;
-import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
-import com.yourrents.services.geodata.model.Province;
-import com.yourrents.services.geodata.repository.ProvinceRepository;
 import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +24,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.yourrents.services.common.searchable.FilterCondition;
+import com.yourrents.services.common.searchable.FilterCriteria;
+import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
+import com.yourrents.services.geodata.model.Province;
+import com.yourrents.services.geodata.repository.ProvinceRepository;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -103,7 +105,7 @@ class ProvinceControllerUpdateDeleteCreateTest {
 		UUID venetoUuid = provincePage.getContent().get(0).region().uuid();
 		Province province = provinceRepository
 				.findById(1).orElseThrow(RuntimeException::new);
-		assertThat(province.region().uuid()).isNotEqualByComparingTo(venetoUuid);
+		assertThat(province.region().uuid(), is(not(venetoUuid)));
 
 		mvc.perform(patch(basePath + PROVINCE_URL + "/" + province.uuid())
 						.contentType(MediaType.APPLICATION_JSON)

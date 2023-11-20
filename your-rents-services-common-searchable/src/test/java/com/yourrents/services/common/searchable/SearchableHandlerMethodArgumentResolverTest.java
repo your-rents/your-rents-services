@@ -2,8 +2,7 @@ package com.yourrents.services.common.searchable;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Map;
-
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
@@ -36,52 +35,66 @@ class SearchableHandlerMethodArgumentResolverTest {
     @SuppressWarnings("null")
     void testResolveArgumentWithFilterValueRequestParams() throws Exception {
 		var request = new MockHttpServletRequest();
-		request.addParameter("filter[field1][value]", "A value for field1");
-		request.addParameter("filter[field2][value]", "A value for field2");
+		request.addParameter("filter.field1.value", "A value for field1");
+		request.addParameter("filter.field2.value", "A value for field2");
 
         assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
 
         Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null, new ServletWebRequest(request), null);
         assertThat(result).isNotNull();
-        Map<String, ? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
         assertThat(conditions).isNotNull();
         assertThat(conditions).hasSize(2);
-        assertThat(conditions.get("field1")).isNotNull();
-        assertThat(conditions.get("field1").getKey()).isEqualTo("field1");
-        assertThat(conditions.get("field1").getValue()).isEqualTo("A value for field1");
-        assertThat(conditions.get("field1").getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
-        assertThat(conditions.get("field2")).isNotNull();
-        assertThat(conditions.get("field2").getKey()).isEqualTo("field2");
-        assertThat(conditions.get("field2").getValue()).isEqualTo("A value for field2");
-        assertThat(conditions.get("field2").getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(0).getField()).isEqualTo("field1");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field1");
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(1).getField()).isEqualTo("field2");
+        assertThat(conditions.get(1).getValue()).isEqualTo("A value for field2");
+        assertThat(conditions.get(1).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+    }
+
+    @Test
+    @SuppressWarnings("null")
+    void testResolveArgumentWithFilterValueRequestParamsWithComplexName() throws Exception {
+		var request = new MockHttpServletRequest();
+		request.addParameter("filter.parent.field.value", "A value for field in parent");
+
+        assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null, new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getField()).isEqualTo("parent.field");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field in parent");
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
     }
 
     @Test
     @SuppressWarnings("null")
     void testResolveArgumentWithAllFilterRequestParams() throws Exception {
 		var request = new MockHttpServletRequest();
-		request.addParameter("filter[field1][key]", "key1");
-		request.addParameter("filter[field1][operator]", "An operator for field1");
-		request.addParameter("filter[field1][value]", "A value for field1");
-        request.addParameter("filter[field2][key]", "key2");
-        request.addParameter("filter[field2][operator]", "An operator for field2");
-		request.addParameter("filter[field2][value]", "A value for field2");
+		request.addParameter("filter.key1.field", "field1");
+		request.addParameter("filter.key1.operator", "An operator for field1");
+		request.addParameter("filter.key1.value", "A value for field1");
+        request.addParameter("filter.key2.field", "field2");
+        request.addParameter("filter.key2.operator", "An operator for field2");
+		request.addParameter("filter.key2.value", "A value for field2");
 
         assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
 
         Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null, new ServletWebRequest(request), null);
         assertThat(result).isNotNull();
-        Map<String, ? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
         assertThat(conditions).isNotNull();
         assertThat(conditions).hasSize(2);
-        assertThat(conditions.get("key1")).isNotNull();
-        assertThat(conditions.get("key1").getKey()).isEqualTo("key1");
-        assertThat(conditions.get("key1").getValue()).isEqualTo("A value for field1");
-        assertThat(conditions.get("key1").getOperator()).isEqualTo("An operator for field1");
-        assertThat(conditions.get("key2")).isNotNull();
-        assertThat(conditions.get("key2").getKey()).isEqualTo("key2");
-        assertThat(conditions.get("key2").getValue()).isEqualTo("A value for field2");
-        assertThat(conditions.get("key2").getOperator()).isEqualTo("An operator for field2");
+        assertThat(conditions.get(0).getField()).isEqualTo("field1");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field1");
+        assertThat(conditions.get(0).getOperator()).isEqualTo("An operator for field1");
+        assertThat(conditions.get(1).getField()).isEqualTo("field2");
+        assertThat(conditions.get(1).getValue()).isEqualTo("A value for field2");
+        assertThat(conditions.get(1).getOperator()).isEqualTo("An operator for field2");
     }
 
     private Class<?> getControllerClass() {

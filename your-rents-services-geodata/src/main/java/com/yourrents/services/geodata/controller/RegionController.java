@@ -1,10 +1,7 @@
 package com.yourrents.services.geodata.controller;
 
-import com.yourrents.services.common.searchable.Searchable;
-import com.yourrents.services.common.util.exception.DataNotFoundException;
-import com.yourrents.services.geodata.model.Region;
-import com.yourrents.services.geodata.repository.RegionRepository;
 import java.util.UUID;
+
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.searchable.annotation.SearchableDefault;
+import com.yourrents.services.common.searchable.annotation.SearchableField;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
+import com.yourrents.services.geodata.model.Region;
+import com.yourrents.services.geodata.repository.RegionRepository;
 
 @RestController
 @RequestMapping("${yrs-geodata.api.basepath}/regions")
@@ -28,7 +32,8 @@ class RegionController {
 
 	@GetMapping
 	public ResponseEntity<Page<Region>> getRegions(
-			Searchable filter,
+			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid"), @SearchableField("name"),
+					@SearchableField("country.localName") }) Searchable filter,
 			@ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
 		Page<Region> page = regionRepository.find(filter, pagination);
 		return ResponseEntity.ok(page);
