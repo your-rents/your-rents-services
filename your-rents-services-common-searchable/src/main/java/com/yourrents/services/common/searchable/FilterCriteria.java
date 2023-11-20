@@ -3,7 +3,6 @@ package com.yourrents.services.common.searchable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class FilterCriteria implements Searchable {
     private List<FilterCondition> conditions;
@@ -26,8 +25,8 @@ public class FilterCriteria implements Searchable {
     }
 
     @Override
-    public Map<String, FilterCondition> getFilter() {
-        return conditions.stream().collect(java.util.stream.Collectors.toMap(FilterCondition::getKey, c -> c));
+    public List<FilterCondition> getFilter() {
+        return this.conditions;
     }
 
     @Override

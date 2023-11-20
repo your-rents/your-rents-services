@@ -110,7 +110,7 @@ class CityControllerTest {
     void testSearchCitiesByNameWithDefaultOperator() throws Exception {
         mvc.perform(get(basePath + "/cities")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("filter[name][value]", "Terme")
+                .param("filter.name.value", "Terme")
                 .param("page", "0")
                 .param("size", Integer.toString(Integer.MAX_VALUE)))
                 .andExpect(status().isOk())
@@ -133,8 +133,8 @@ class CityControllerTest {
     void testSearchCityByProvinceName() throws Exception {
         mvc.perform(get(basePath + "/cities")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("filter[province.name][value]", "Verona")
-                .param("filter[province.name][operator]", "eq")
+                .param("filter.province.name.value", "Verona")
+                .param("filter.province.name.operator", "eq")
                 .param("page", "0")
                 .param("size", Integer.toString(Integer.MAX_VALUE)))
                 .andExpect(status().isOk())

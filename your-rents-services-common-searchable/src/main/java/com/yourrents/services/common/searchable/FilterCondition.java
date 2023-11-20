@@ -16,7 +16,7 @@ public class FilterCondition implements SearchCondition<String, String, String> 
     }
 
     @Override
-    public String getKey() {
+    public String getField() {
         return field;
     }
 

@@ -15,7 +15,6 @@ import org.jooq.Table;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.yourrents.services.common.searchable.SearchCondition;
 import com.yourrents.services.common.searchable.Searchable;
 
 @Service
@@ -27,8 +26,10 @@ public class JooqUtils {
         /**
          * Paginate a query
          * 
-         * Thanks to
+         * Inspired by:
          * https://blog.jooq.org/calculating-pagination-metadata-without-extra-roundtrips-in-sql/
+         * 
+         * @author Lucio Benfante 
          * 
          * @param ctx
          * @param original
@@ -73,11 +74,10 @@ public class JooqUtils {
 
         private Condition getCondition(Searchable filter, Function<String, Field<?>> fieldMapper,
                         boolean ignoreNotSupported) {
-                return filter.getFilter().entrySet().stream()
-                                .filter(e -> !ignoreNotSupported || isFieldSupported(e.getKey(), fieldMapper))
-                                .map(e -> {
-                                        SearchCondition<?, ?, ?> c = e.getValue();
-                                        Field<?> field = fieldMapper.apply(c.getKey().toString());
+                return filter.getFilter().stream()
+                                .filter(c -> !ignoreNotSupported || isFieldSupported(c.getField().toString(), fieldMapper))
+                                .map(c -> {
+                                        Field<?> field = fieldMapper.apply(c.getField().toString());
                                         return buildStringCondition(
                                                         field.coerce(String.class),
                                                         c.getOperator().toString(),

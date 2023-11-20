@@ -1,7 +1,7 @@
 package com.yourrents.services.common.searchable;
 
-import java.util.Map;
+import java.util.List;
 
 public interface Searchable {
-    Map<String, ? extends SearchCondition<?, ?, ?>> getFilter();
+    List<? extends SearchCondition<?, ?, ?>> getFilter();
 }
