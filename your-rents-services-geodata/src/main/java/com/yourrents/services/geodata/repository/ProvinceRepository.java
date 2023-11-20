@@ -8,7 +8,10 @@ import static org.jooq.Records.mapping;
 import static org.jooq.impl.DSL.row;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
+import com.yourrents.services.geodata.jooq.tables.records.ProvinceLocalDataRecord;
+import com.yourrents.services.geodata.jooq.tables.records.ProvinceRecord;
 import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.model.ProvinceLocalData;
 import java.util.List;
@@ -24,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class ProvinceRepository {
@@ -68,6 +72,104 @@ public class ProvinceRepository {
 				.fetchOptional()
 				.map(mapping(Province::new));
 	}
+
+	/**
+	 * Create a new Province
+	 *
+	 * @return the new created province
+	 */
+	@Transactional(readOnly = false)
+	public Province create(Province province) {
+		Integer regionId = null;
+		if (province.region() != null) {
+			regionId = dsl.select(REGION.ID)
+					.from(REGION)
+					.where(REGION.EXTERNAL_ID.eq(province.region().uuid()))
+					.fetchOptional(REGION.ID).orElseThrow(
+							() -> new DataNotFoundException("Region not found: "
+									+ province.region().uuid()));
+		}
+		ProvinceRecord newProvince = dsl.newRecord(PROVINCE);
+		newProvince.setName(province.name());
+		newProvince.setRegionId(regionId);
+		newProvince.insert();
+		if (province.localData() != null) {
+			ProvinceLocalDataRecord newLocalData = dsl.newRecord(PROVINCE_LOCAL_DATA);
+			newLocalData.setId(newProvince.getId());
+			newLocalData.setItCodiceIstat(province.localData().itCodiceIstat());
+			newLocalData.setItSigla(province.localData().itSigla());
+			newLocalData.insert();
+		}
+		return findById(newProvince.getId()).orElseThrow();
+	}
+
+
+	/**
+	 * Delete a province
+	 *
+	 * @return true if the province has been deleted, false otherwise
+	 * @throws DataNotFoundException if the province does not exist
+	 */
+	@Transactional(readOnly = false)
+	public boolean delete(UUID uuid) {
+		Integer provinceId = dsl.select(PROVINCE.ID)
+				.from(PROVINCE)
+				.where(PROVINCE.EXTERNAL_ID.eq(uuid))
+				.fetchOptional(PROVINCE.ID).orElseThrow(
+						() -> new DataNotFoundException("Province not found: " + uuid));
+		dsl.delete(PROVINCE_LOCAL_DATA)
+				.where(PROVINCE_LOCAL_DATA.ID.eq(provinceId))
+				.execute();
+		return dsl.deleteFrom(PROVINCE)
+				.where(PROVINCE.ID.eq(provinceId))
+				.execute() > 0;
+	}
+
+
+	/**
+	 * Update a province.
+	 * <p>
+	 * You can update the name, the region and the local data. You can't update the province uuid.
+	 * You can't update the region data, you can only change the region.
+	 * <p>
+	 * Only not null fields are used to update the province.
+	 *
+	 * @param uuid     the uuid of the province to be updated.
+	 * @param province the data of province to be updated.
+	 * @return the updated province
+	 * @throws DataNotFoundException if the province does not exist
+	 */
+	@Transactional(readOnly = false)
+	public Province update(UUID uuid, Province province) {
+		ProvinceRecord dbProvince = dsl.selectFrom(PROVINCE)
+				.where(PROVINCE.EXTERNAL_ID.eq(uuid))
+				.fetchOptional().orElseThrow(
+						() -> new DataNotFoundException("Province not found: " + uuid));
+		if (province.name() != null) {
+			dbProvince.setName(province.name());
+		}
+		if (province.region() != null) {
+			Integer regionId = dsl.select(REGION.ID)
+					.from(REGION)
+					.where(REGION.EXTERNAL_ID.eq(province.region().uuid()))
+					.fetchOptional(REGION.ID).orElseThrow(
+							() -> new IllegalArgumentException("Region not found: "
+									+ province.region().uuid()));
+			dbProvince.setRegionId(regionId);
+		}
+		dbProvince.update();
+		if (province.localData() != null) {
+			ProvinceLocalDataRecord localData =
+					dsl.newRecord(PROVINCE_LOCAL_DATA);
+			localData.setId(dbProvince.getId());
+			localData.setItCodiceIstat(province.localData().itCodiceIstat());
+			localData.setItSigla(province.localData().itSigla());
+			localData.merge();
+		}
+		return findById(dbProvince.getId())
+				.orElseThrow(() -> new RuntimeException("failed to update province: " + uuid));
+	}
+
 
 	private SelectOnConditionStep<Record4<UUID, String, ProvinceLocalData, Province.Region>> getSelectProvinceSpec() {
 		return dsl.select(
