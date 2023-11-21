@@ -11,6 +11,8 @@
     <groupId>com.yourrents.services</groupId>
     <artifactId>your-rents-services-common-searchable</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+	<name>YourRents Common Searchable</name>
+	<description>Support for Searchable params for the YourRents applications</description>
 
     <properties>
         <java.version>17</java.version>
