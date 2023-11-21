@@ -84,7 +84,7 @@ class ProvinceControllerUpdateDeleteCreateTest {
 		//we expect a 4xx error because this province it is referenced by at least one city.
 		mvc.perform(delete(basePath + PROVINCE_URL + "/" + province.uuid())
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().is4xxClientError());
+				.andExpect(status().isConflict());
 	}
 
 	@Test

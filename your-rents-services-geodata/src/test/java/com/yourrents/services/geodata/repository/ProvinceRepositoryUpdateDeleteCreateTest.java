@@ -6,6 +6,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataConflictException;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.Province;
@@ -80,10 +81,11 @@ class ProvinceRepositoryUpdateDeleteCreateTest {
 				FilterCondition.of("name", "eq", "Venezia"));
 		Page<Province> provincePage = provinceRepository.find(filterForVenezia,
 				PageRequest.ofSize(1));
-		UUID veneziaUuid = provincePage.getContent().get(0).uuid();
-
-		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
-				provinceRepository.delete(veneziaUuid));
+		Province province = provincePage.getContent().get(0);
+		UUID veneziaUuid = province.uuid();
+		assertThatExceptionOfType(DataConflictException.class).isThrownBy(() ->
+						provinceRepository.delete(veneziaUuid))
+				.withMessageContaining(province.uuid().toString());
 	}
 
 	@Test
