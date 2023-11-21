@@ -26,6 +26,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
+import java.util.UUID;
 
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
@@ -49,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ProvinceRepositoryTest {
 
-	static final int NUM_PROVINCES = 107;
+	static final int NUM_PROVINCES = 108;
 	static final int PAGE_SIZE = 5;
 
 	@Autowired
@@ -78,8 +81,8 @@ class ProvinceRepositoryTest {
 		Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by(Order.desc("name")));
 		Page<Province> result = provinceRepository.find(FilterCriteria.of(), pageable);
 		assertThat(result, iterableWithSize(PAGE_SIZE));
-		assertThat(result.getContent().get(0).name(), equalTo("Viterbo"));
-		assertThat(result.getContent().get(PAGE_SIZE - 1).name(), equalTo("Vercelli"));
+		assertThat(result.getContent().get(0).name(), equalTo("ZZZ No Cities Province"));
+		assertThat(result.getContent().get(PAGE_SIZE - 1).name(), equalTo("Verona"));
 	}
 
 	@Test
@@ -147,4 +150,13 @@ class ProvinceRepositoryTest {
 		assertThat(expected, notNullValue());
 	}
 
+	@Test 
+	void findTestProvince() {
+		Province result = provinceRepository.findById(1000000).orElseThrow(RuntimeException::new);
+		assertThat(result, notNullValue());
+		assertThat(result.name(), equalTo("ZZZ No Cities Province"));
+		assertThat(result.localData(), nullValue());
+		assertThat(result.region(), nullValue());
+		assertThat(result.uuid(), equalTo(UUID.fromString("00000000-0000-0000-0000-000000000001")));
+	}
 }
