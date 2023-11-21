@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
@@ -83,7 +82,7 @@ class ProvinceRepositoryUpdateDeleteCreateTest {
 				PageRequest.ofSize(1));
 		UUID veneziaUuid = provincePage.getContent().get(0).uuid();
 
-		assertThatExceptionOfType(DataIntegrityViolationException.class).isThrownBy(() ->
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
 				provinceRepository.delete(veneziaUuid));
 	}
 

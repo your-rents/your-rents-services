@@ -10,8 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.yourrents.services.common.searchable.FilterCondition;
+import com.yourrents.services.common.searchable.FilterCriteria;
+import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
+import com.yourrents.services.geodata.model.Province;
+import com.yourrents.services.geodata.repository.ProvinceRepository;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.yourrents.services.common.searchable.FilterCondition;
-import com.yourrents.services.common.searchable.FilterCriteria;
-import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
-import com.yourrents.services.geodata.model.Province;
-import com.yourrents.services.geodata.repository.ProvinceRepository;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -83,10 +81,10 @@ class ProvinceControllerUpdateDeleteCreateTest {
 	void deleteAnExistingProvince() throws Exception {
 		Province province = provinceRepository.findById(1).orElseThrow(RuntimeException::new);
 
-		//we expect a 5xx error because of the foreign key constraint
+		//we expect a 4xx error because this province it is referenced by at least one city.
 		mvc.perform(delete(basePath + PROVINCE_URL + "/" + province.uuid())
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().is5xxServerError());
+				.andExpect(status().is4xxClientError());
 	}
 
 	@Test
