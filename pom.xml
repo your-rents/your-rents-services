@@ -1,17 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.yourrents.services</groupId>
 	<artifactId>your-rents-services-parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>YourRents Services parent</name>
 	<description>Parent of service projects for the YourRents applications</description>
-	<packaging>pom</packaging>
+    <organization>
+        <name>Your Rents Team</name>
+    </organization>
+    <inceptionYear>2023</inceptionYear>
+	<url>https://github.com/your-rents/your-rents-services</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<common.spring-boot.version>3.1.5</common.spring-boot.version>
 	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.3.0</version>
+				<configuration>
+					<verbose>false</verbose>
+					<addSvnKeyWords>false</addSvnKeyWords>
+					<licenseName>apache_v2</licenseName>
+					<licenseFile>${basedir}/LICENSE</licenseFile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>update-license-headers</id>
+						<goals>
+							<goal>update-file-header</goal>
+						</goals>
+						<phase>process-sources</phase>
+						<configuration>
+							<licenseName>apache_v2</licenseName>
+							<excludes>
+								<exclude>**/*.json</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<modules>
 		<module>your-rents-services-common-util</module>
 		<module>your-rents-services-common-searchable</module>
