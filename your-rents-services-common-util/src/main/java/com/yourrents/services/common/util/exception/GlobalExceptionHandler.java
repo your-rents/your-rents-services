@@ -1,7 +1,6 @@
 package com.yourrents.services.common.util.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +22,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return super.handleExceptionInternal(e,
 				buildErrorResponse(e.getMessage(), e, request, HttpStatus.NOT_FOUND.value()),
 				new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+	}
+
+	@ExceptionHandler(DataConflictException.class)
+	public ResponseEntity<Object> dataConflict(DataConflictException e, NativeWebRequest request) {
+		logger.trace(e.getMessage(), e);
+		return super.handleExceptionInternal(e,
+				buildErrorResponse(e.getMessage(), e, request, HttpStatus.CONFLICT.value()),
+				new HttpHeaders(), HttpStatus.CONFLICT, request);
 	}
 
     @ExceptionHandler(IllegalArgumentException.class)

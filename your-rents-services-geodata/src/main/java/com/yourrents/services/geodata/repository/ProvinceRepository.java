@@ -3,11 +3,13 @@ package com.yourrents.services.geodata.repository;
 import static com.yourrents.services.geodata.jooq.Tables.PROVINCE;
 import static com.yourrents.services.geodata.jooq.Tables.PROVINCE_LOCAL_DATA;
 import static com.yourrents.services.geodata.jooq.Tables.REGION;
+import static com.yourrents.services.geodata.jooq.tables.City.CITY;
 import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.Records.mapping;
 import static org.jooq.impl.DSL.row;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataConflictException;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.jooq.tables.records.ProvinceLocalDataRecord;
@@ -105,10 +107,11 @@ public class ProvinceRepository {
 
 
 	/**
-	 * Delete a province
+	 * Delete a province only if there are no referenced cities associated with it.
 	 *
 	 * @return true if the province has been deleted, false otherwise
 	 * @throws DataNotFoundException if the province does not exist
+	 * @throws IllegalArgumentException if there is at least one city associated to it
 	 */
 	@Transactional(readOnly = false)
 	public boolean delete(UUID uuid) {
@@ -117,6 +120,12 @@ public class ProvinceRepository {
 				.where(PROVINCE.EXTERNAL_ID.eq(uuid))
 				.fetchOptional(PROVINCE.ID).orElseThrow(
 						() -> new DataNotFoundException("Province not found: " + uuid));
+		boolean citiesExist = dsl.fetchExists(CITY, CITY.PROVINCE_ID.eq(provinceId));
+		if (citiesExist) {
+			throw new DataConflictException(
+					"Unable to delete the province with UUID: " + uuid
+							+ " because it is referenced by at least one city");
+		}
 		dsl.delete(PROVINCE_LOCAL_DATA)
 				.where(PROVINCE_LOCAL_DATA.ID.eq(provinceId))
 				.execute();
