@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +48,6 @@ import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.CityRepository;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
 @Transactional
