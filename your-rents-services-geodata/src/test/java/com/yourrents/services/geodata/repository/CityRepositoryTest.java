@@ -38,7 +38,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yourrents.services.common.searchable.FilterCondition;
@@ -50,7 +49,6 @@ import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @Transactional
 class CityRepositoryTest {

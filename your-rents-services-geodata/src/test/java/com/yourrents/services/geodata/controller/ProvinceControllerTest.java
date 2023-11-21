@@ -39,17 +39,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
 @Transactional
 class ProvinceControllerTest {
-	static final int NUM_PROVINCES = 107;
+	static final int NUM_PROVINCES = 108;
 	final static String PROVINCE_URL = "/provinces";
 	@Autowired
 	MockMvc mvc;
@@ -110,7 +108,7 @@ class ProvinceControllerTest {
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.content").isArray())
 				.andExpect(jsonPath("$.content", hasSize(20)))
-				.andExpect(jsonPath("$.content[0].name", is("Viterbo")))
+				.andExpect(jsonPath("$.content[0].name", is("ZZZ No Cities Province")))
 				.andExpect(jsonPath("$.totalPages", is(numOfPages(NUM_PROVINCES, 20))))
 				.andExpect(jsonPath("$.totalElements", is(NUM_PROVINCES)))
 				.andExpect(jsonPath("$.last", is(false)))
