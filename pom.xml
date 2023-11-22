@@ -9,13 +9,63 @@
 	<packaging>pom</packaging>
 	<name>YourRents Services parent</name>
 	<description>Parent of service projects for the YourRents applications</description>
-    <organization>
-        <name>Your Rents Team</name>
-    </organization>
-    <inceptionYear>2023</inceptionYear>
+	<organization>
+		<name>Your Rents Team</name>
+		<url>https://github.com/your-rents</url>
+	</organization>
+	<developers>
+		<developer>
+			<id>benfante</id>
+			<name>Lucio Benfante</name>
+			<email>lucio.benfante@gmail.com</email>
+			<url>https://github.com/benfante</url>
+			<organization>Benfante Lucio</organization>
+			<organizationUrl>http://www.benfante.com</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/Rome</timezone>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/134066?v=4</picUrl>
+			</properties>
+		</developer>
+		<developer>
+			<id>egch</id>
+			<name>Enrico Giurin</name>
+			<email>enricogiurin@gmail.com</email>
+			<url>https://github.com/egch</url>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/Rome</timezone>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/11061018?v=4</picUrl>
+			</properties>
+		</developer>
+	</developers>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/your-rents/your-rents-services/issues</url>
+	</issueManagement>
+	<scm>
+		<connection>scm:git:https://github.com/your-rents/your-rents-services.git</connection>
+		<developerConnection>scm:git:git@github.com:your-rents/your-rents-services.git</developerConnection>
+		<url>https://github.com/your-rents/your-rents-services</url>
+	</scm>
+	<inceptionYear>2023</inceptionYear>
 	<url>https://github.com/your-rents/your-rents-services</url>
+	<licenses>
+		<license>
+			<name>Apache-2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>17</java.version>
 		<common.spring-boot.version>3.1.5</common.spring-boot.version>
 	</properties>
 	<build>
@@ -42,6 +92,29 @@
 							<excludes>
 								<exclude>**/*.json</exclude>
 							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.0</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>${java.version}</version>
+								  </requireJavaVersion>								
+							</rules>
 						</configuration>
 					</execution>
 				</executions>

@@ -14,7 +14,6 @@
 	<name>YourRents Service Common Util</name>
 	<description>Common utils for services of the YourRents applications</description>
     <properties>
-        <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
     </properties>
 
