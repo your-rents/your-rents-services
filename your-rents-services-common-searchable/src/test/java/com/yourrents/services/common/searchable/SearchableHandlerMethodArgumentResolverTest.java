@@ -40,7 +40,7 @@ class SearchableHandlerMethodArgumentResolverTest {
     @BeforeEach
     void setUp() throws Exception {
         this.supportedMethodParameter = getParameterOfMethod("supportedMethod", Searchable.class);
-        this.resolver = new SearchableHandlerMethodArgumentResolver();                
+        this.resolver = new SearchableHandlerMethodArgumentResolver();
     }
 
     @Test
@@ -48,21 +48,22 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
     }
 
-	@Test
-	void doesNotSupportNonSearchable() {
+    @Test
+    void doesNotSupportNonSearchable() {
         assertThat(resolver.supportsParameter(getParameterOfMethod("unsupportedMethod", String.class))).isFalse();
-	}
+    }
 
     @Test
     @SuppressWarnings("null")
     void testResolveArgumentWithFilterValueRequestParams() throws Exception {
-		var request = new MockHttpServletRequest();
-		request.addParameter("filter.field1.value", "A value for field1");
-		request.addParameter("filter.field2.value", "A value for field2");
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.field1.value", "A value for field1");
+        request.addParameter("filter.field2.value", "A value for field2");
 
         assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
 
-        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null, new ServletWebRequest(request), null);
+        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null,
+                new ServletWebRequest(request), null);
         assertThat(result).isNotNull();
         List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
         assertThat(conditions).isNotNull();
@@ -78,12 +79,13 @@ class SearchableHandlerMethodArgumentResolverTest {
     @Test
     @SuppressWarnings("null")
     void testResolveArgumentWithFilterValueRequestParamsWithComplexName() throws Exception {
-		var request = new MockHttpServletRequest();
-		request.addParameter("filter.parent.field.value", "A value for field in parent");
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.parent.field.value", "A value for field in parent");
 
         assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
 
-        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null, new ServletWebRequest(request), null);
+        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null,
+                new ServletWebRequest(request), null);
         assertThat(result).isNotNull();
         List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
         assertThat(conditions).isNotNull();
@@ -96,17 +98,18 @@ class SearchableHandlerMethodArgumentResolverTest {
     @Test
     @SuppressWarnings("null")
     void testResolveArgumentWithAllFilterRequestParams() throws Exception {
-		var request = new MockHttpServletRequest();
-		request.addParameter("filter.key1.field", "field1");
-		request.addParameter("filter.key1.operator", "An operator for field1");
-		request.addParameter("filter.key1.value", "A value for field1");
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.key1.field", "field1");
+        request.addParameter("filter.key1.operator", "An operator for field1");
+        request.addParameter("filter.key1.value", "A value for field1");
         request.addParameter("filter.key2.field", "field2");
         request.addParameter("filter.key2.operator", "An operator for field2");
-		request.addParameter("filter.key2.value", "A value for field2");
+        request.addParameter("filter.key2.value", "A value for field2");
 
         assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
 
-        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null, new ServletWebRequest(request), null);
+        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null,
+                new ServletWebRequest(request), null);
         assertThat(result).isNotNull();
         List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
         assertThat(conditions).isNotNull();
@@ -122,14 +125,16 @@ class SearchableHandlerMethodArgumentResolverTest {
     @Test
     @SuppressWarnings("null")
     void testResolveArgumentWithFilterPrefix() throws Exception {
-        MethodParameter methodWithPrefixConfiguration = getParameterOfMethod("methodWithPrefixConfiguration", Searchable.class);
+        MethodParameter methodWithPrefixConfiguration = getParameterOfMethod("methodWithPrefixConfiguration",
+                Searchable.class);
 
-		var request = new MockHttpServletRequest();
-		request.addParameter("customPrefix.field.value", "A value for field");
+        var request = new MockHttpServletRequest();
+        request.addParameter("customPrefix.field.value", "A value for field");
 
         assertThat(resolver.supportsParameter(methodWithPrefixConfiguration)).isTrue();
 
-        Searchable result = (Searchable) resolver.resolveArgument(methodWithPrefixConfiguration, null, new ServletWebRequest(request), null);
+        Searchable result = (Searchable) resolver.resolveArgument(methodWithPrefixConfiguration, null,
+                new ServletWebRequest(request), null);
         assertThat(result).isNotNull();
         List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
         assertThat(conditions).isNotNull();
@@ -153,7 +158,9 @@ class SearchableHandlerMethodArgumentResolverTest {
 
     private interface Sample {
         void supportedMethod(Searchable searchable);
+
         void unsupportedMethod(String string);
+
         void methodWithPrefixConfiguration(@SearchableDefault(prefix = "customPrefix") Searchable searchable);
     }
 }

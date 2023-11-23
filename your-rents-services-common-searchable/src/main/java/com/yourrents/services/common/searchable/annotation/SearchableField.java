@@ -52,7 +52,8 @@ public @interface SearchableField {
      * The number of times this field can be repeated in the OpenAPI documentation.
      * 
      * @return the number of times this field can be repeated in the OpenAPI.
-     *   Negative values will not be considered, so the general repeat value will be used.
+     *         Negative values will not be considered, so the general repeat value
+     *         will be used.
      */
     int repeat() default -1;
 }

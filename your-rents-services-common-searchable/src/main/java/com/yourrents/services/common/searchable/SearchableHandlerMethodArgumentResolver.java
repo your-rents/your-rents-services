@@ -65,7 +65,8 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
                     log.debug("Extracted filter key: {}", key);
                     filterKeys.add(key);
                     String field = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".field"), key);
-                    String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".operator"), DEFAULT_OPERATOR);
+                    String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".operator"),
+                            DEFAULT_OPERATOR);
                     String value = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".value"), "");
                     conditions.add(new FilterCondition(field, operator, value));
                 }

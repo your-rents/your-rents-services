@@ -30,7 +30,7 @@ import com.yourrents.services.common.searchable.SearchableHandlerMethodArgumentR
 
 @Component
 public class SearchableArgumentResolverConfigurer implements WebMvcConfigurer {
-    
+
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new SearchableHandlerMethodArgumentResolver());

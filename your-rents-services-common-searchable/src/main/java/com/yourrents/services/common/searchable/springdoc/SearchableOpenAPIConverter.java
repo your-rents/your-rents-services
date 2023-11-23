@@ -77,7 +77,7 @@ public class SearchableOpenAPIConverter implements ModelConverter {
                     type = SEARCHABLE;
                 else
                     type.name(cls.getSimpleName() + StringUtils.capitalize(type.getParent().getType()));
-           }
+            }
         }
         return (chain.hasNext()) ? chain.next().resolve(type, context, chain) : null;
     }

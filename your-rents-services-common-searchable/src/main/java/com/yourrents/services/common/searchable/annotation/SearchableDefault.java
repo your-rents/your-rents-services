@@ -55,7 +55,8 @@ public @interface SearchableDefault {
     SearchableField[] supportedFields() default {};
 
     /**
-     * The default number of repeated search parameters in the OpenAPI documentation.
+     * The default number of repeated search parameters in the OpenAPI
+     * documentation.
      * 
      * @return the default number of repeated search parameters in the OpenAPI
      */

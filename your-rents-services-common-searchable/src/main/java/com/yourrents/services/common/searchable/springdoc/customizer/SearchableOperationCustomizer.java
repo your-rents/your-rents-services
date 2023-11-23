@@ -50,7 +50,8 @@ public class SearchableOperationCustomizer implements OperationCustomizer {
                 Arrays.stream(searchableDefault.supportedFields()).forEach(searchableField -> {
                     int repeat = getRepeat(searchableDefault, searchableField);
                     for (int i = 1; i <= repeat; i++) {
-                        addFilterParameters(operation, getKey(searchableField.name(), i, repeat), searchableField.name());
+                        addFilterParameters(operation, getKey(searchableField.name(), i, repeat),
+                                searchableField.name());
                     }
                 });
             }
