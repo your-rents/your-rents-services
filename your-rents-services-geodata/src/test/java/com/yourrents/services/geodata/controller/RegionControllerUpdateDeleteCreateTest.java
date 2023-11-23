@@ -100,7 +100,7 @@ class RegionControllerUpdateDeleteCreateTest {
   void deleteAnExistingRegion() throws Exception {
     Region region = regionRepository.findById(1).orElseThrow(RuntimeException::new);
 
-    //we expect a 4xx error because this province it is referenced by at least one city.
+    //we expect a 4xx error because this region it is referenced by at least one province.
     mvc.perform(delete(basePath + REGION_URL + "/" + region.uuid())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isConflict());

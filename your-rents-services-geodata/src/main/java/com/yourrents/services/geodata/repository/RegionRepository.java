@@ -140,7 +140,7 @@ public class RegionRepository {
     boolean provincesExist = dsl.fetchExists(PROVINCE, PROVINCE.REGION_ID.eq(regionId));
     if (provincesExist) {
       throw new DataConflictException(
-          "Unable to delete the province with UUID: " + uuid
+          "Unable to delete the region with UUID: " + uuid
               + " because it is referenced by at least one province");
     }
     dsl.delete(REGION_LOCAL_DATA)

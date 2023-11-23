@@ -97,6 +97,19 @@ class RegionRepositoryTest {
 		assertThat(result.getContent().get(0).name(), equalTo("Veneto"));
 	}
 
+  @Test
+  void findFilteredByCountryEqualsEmpty() {
+    FilterCriteria filter = FilterCriteria.of(FilterCondition.of("country.localName", "eq", "Andorra"));
+    Page<Region> result = regionRepository.find(filter, PageRequest.ofSize(Integer.MAX_VALUE));
+    assertThat(result, iterableWithSize(0));
+  }
+  @Test
+  void findFilteredByCountryEquals() {
+    FilterCriteria filter = FilterCriteria.of(FilterCondition.of("country.localName", "eq", "Italy"));
+    Page<Region> result = regionRepository.find(filter, PageRequest.ofSize(Integer.MAX_VALUE));
+    assertThat(result, iterableWithSize(NUM_REGIONS));
+  }
+
 	@Test
 	void findFilteredByNameContainsIgnoreCaseWithOrderByNameDesc() {
 		Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.desc("name")));
