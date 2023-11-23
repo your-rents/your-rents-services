@@ -62,6 +62,13 @@ public @interface SearchableDefault {
     int repeatDefault() default 1;
 
     /**
+     * The prefix to use for each parameter.
+     * 
+     * @return the prefix to use for each parameter
+     */
+    String prefix() default "filter";
+
+    /**
      * Hide the OpenAPI documentation generation for this parameter.
      * 
      * @return true if the parameter should be hidden from the OpenAPI documentation

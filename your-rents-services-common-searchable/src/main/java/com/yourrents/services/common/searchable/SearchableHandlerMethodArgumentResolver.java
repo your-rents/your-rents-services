@@ -33,7 +33,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import com.yourrents.services.common.searchable.annotation.SearchableDefault;
+
 public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final String DEFAULT_FILTER_PREFIX = "filter";
     public static final String DEFAULT_OPERATOR = "containsIgnoreCase";
     private static final Logger log = LoggerFactory.getLogger(SearchableHandlerMethodArgumentResolver.class);
 
@@ -45,7 +48,7 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
     @Override
     public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
-        String filterPrefix = "filter.";
+        String filterPrefix = getFilterPrefix(parameter);
         List<FilterCondition> conditions = new ArrayList<FilterCondition>();
         List<String> filterKeys = new ArrayList<String>();
         webRequest.getParameterMap().forEach((k, v) -> {
@@ -71,6 +74,15 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
         FilterCriteria result = new FilterCriteria(conditions);
         log.debug("Searchable parameter resolved to: {}", result);
         return result;
+    }
+
+    private String getFilterPrefix(MethodParameter parameter) {
+        String result = DEFAULT_FILTER_PREFIX;
+        SearchableDefault defaults = parameter.getParameterAnnotation(SearchableDefault.class);
+        if (defaults != null) {
+            result = defaults.prefix();
+        }
+        return result + ".";
     }
 
 }

@@ -30,6 +30,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
+import com.yourrents.services.common.searchable.annotation.SearchableDefault;
+
 class SearchableHandlerMethodArgumentResolverTest {
 
     MethodParameter supportedMethodParameter;
@@ -117,6 +119,26 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions.get(1).getOperator()).isEqualTo("An operator for field2");
     }
 
+    @Test
+    @SuppressWarnings("null")
+    void testResolveArgumentWithFilterPrefix() throws Exception {
+        MethodParameter methodWithPrefixConfiguration = getParameterOfMethod("methodWithPrefixConfiguration", Searchable.class);
+
+		var request = new MockHttpServletRequest();
+		request.addParameter("customPrefix.field.value", "A value for field");
+
+        assertThat(resolver.supportsParameter(methodWithPrefixConfiguration)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(methodWithPrefixConfiguration, null, new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getField()).isEqualTo("field");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field");
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+    }
+
     private Class<?> getControllerClass() {
         return Sample.class;
     }
@@ -132,5 +154,6 @@ class SearchableHandlerMethodArgumentResolverTest {
     private interface Sample {
         void supportedMethod(Searchable searchable);
         void unsupportedMethod(String string);
+        void methodWithPrefixConfiguration(@SearchableDefault(prefix = "customPrefix") Searchable searchable);
     }
 }
