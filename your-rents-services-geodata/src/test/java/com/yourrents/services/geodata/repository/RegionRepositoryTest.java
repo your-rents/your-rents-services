@@ -44,7 +44,7 @@ import org.springframework.data.domain.Sort;
 @Import(TestYourRentsGeoDataServiceApplication.class)
 class RegionRepositoryTest {
 
-	static final int NUM_REGIONS = 20;
+  static final int NUM_REGIONS = 21;
 	static final int PAGE_SIZE = 5;
 
 	@Autowired
@@ -73,8 +73,8 @@ class RegionRepositoryTest {
 		Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by(Sort.Order.desc("name")));
 		Page<Region> page = regionRepository.find(FilterCriteria.of(), pageable);
 		assertThat(page, iterableWithSize(PAGE_SIZE));
-		assertThat(page.getContent().get(0).name(), equalTo("Veneto"));
-		assertThat(page.getContent().get(PAGE_SIZE - 1).name(), equalTo("Toscana"));
+    assertThat(page.getContent().get(0).name(), equalTo("ZZZ No Provinces Region"));
+    assertThat(page.getContent().get(PAGE_SIZE - 1).name(), equalTo("Trentino Alto Adige"));
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class RegionRepositoryTest {
 		Page<Region> page = regionRepository.find(FilterCriteria.of(), pageable);
 		assertThat(page, iterableWithSize(numRecordsForPage));
 		if (numRecordsForPage > 0) {
-			assertThat(page.getContent().get(0).name(), equalTo("Toscana"));
+      assertThat(page.getContent().get(0).name(), equalTo("ZZZ No Provinces Region"));
 		}
 	}
 
@@ -96,6 +96,19 @@ class RegionRepositoryTest {
 		assertThat(result, iterableWithSize(1));
 		assertThat(result.getContent().get(0).name(), equalTo("Veneto"));
 	}
+
+  @Test
+  void findFilteredByCountryEqualsEmpty() {
+    FilterCriteria filter = FilterCriteria.of(FilterCondition.of("country.localName", "eq", "Andorra"));
+    Page<Region> result = regionRepository.find(filter, PageRequest.ofSize(Integer.MAX_VALUE));
+    assertThat(result, iterableWithSize(0));
+  }
+  @Test
+  void findFilteredByCountryEquals() {
+    FilterCriteria filter = FilterCriteria.of(FilterCondition.of("country.localName", "eq", "Italy"));
+    Page<Region> result = regionRepository.find(filter, PageRequest.ofSize(Integer.MAX_VALUE));
+    assertThat(result, iterableWithSize(NUM_REGIONS));
+  }
 
 	@Test
 	void findFilteredByNameContainsIgnoreCaseWithOrderByNameDesc() {

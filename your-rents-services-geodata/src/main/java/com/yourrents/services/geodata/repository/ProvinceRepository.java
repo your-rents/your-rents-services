@@ -97,7 +97,6 @@ public class ProvinceRepository {
 
 	/**
 	 * Create a new Province
-	 *
 	 * @return the new created province
 	 */
 	@Transactional(readOnly = false)
@@ -131,7 +130,7 @@ public class ProvinceRepository {
 	 *
 	 * @return true if the province has been deleted, false otherwise
 	 * @throws DataNotFoundException if the province does not exist
-	 * @throws IllegalArgumentException if there is at least one city associated to it
+   * @throws DataConflictException if there is at least one city associated to it
 	 */
 	@Transactional(readOnly = false)
 	public boolean delete(UUID uuid) {
