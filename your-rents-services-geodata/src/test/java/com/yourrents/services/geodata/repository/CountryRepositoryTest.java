@@ -40,9 +40,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest()
 @Import(TestYourRentsGeoDataServiceApplication.class)
+@Transactional
 class CountryRepositoryTest {
 
 	static final int NUM_COUNTRIES = 246;

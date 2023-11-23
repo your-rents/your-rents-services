@@ -47,10 +47,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
+@Transactional
 class RegionControllerUpdateDeleteCreateTest {
 
   static final int NUM_REGIONS = 21;//there are test data regions
