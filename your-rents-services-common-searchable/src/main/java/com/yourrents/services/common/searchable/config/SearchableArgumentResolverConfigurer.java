@@ -22,6 +22,7 @@ package com.yourrents.services.common.searchable.config;
 
 import java.util.List;
 
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -30,9 +31,14 @@ import com.yourrents.services.common.searchable.SearchableHandlerMethodArgumentR
 
 @Component
 public class SearchableArgumentResolverConfigurer implements WebMvcConfigurer {
+    private GenericConversionService conversionService;
+
+    public SearchableArgumentResolverConfigurer(GenericConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new SearchableHandlerMethodArgumentResolver());
+        resolvers.add(new SearchableHandlerMethodArgumentResolver(conversionService));
     }
 }

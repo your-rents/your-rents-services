@@ -27,6 +27,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -39,6 +40,12 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
     private static final String DEFAULT_FILTER_PREFIX = "filter";
     public static final String DEFAULT_OPERATOR = "containsIgnoreCase";
     private static final Logger log = LoggerFactory.getLogger(SearchableHandlerMethodArgumentResolver.class);
+
+    private GenericConversionService conversionService;
+
+    public SearchableHandlerMethodArgumentResolver(GenericConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -67,7 +74,9 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
                     String field = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".field"), key);
                     String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".operator"),
                             DEFAULT_OPERATOR);
-                    String value = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".value"), "");
+                    Object value = convertValue(field,
+                            Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".value"), ""),
+                            parameter);
                     conditions.add(new FilterCondition(field, operator, value));
                 }
             }
@@ -84,6 +93,10 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
             result = defaults.prefix();
         }
         return result + ".";
+    }
+
+    private Object convertValue(String field, String stringValue, MethodParameter parameter) {
+        return stringValue;
     }
 
 }

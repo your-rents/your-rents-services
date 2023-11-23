@@ -26,6 +26,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -40,7 +42,8 @@ class SearchableHandlerMethodArgumentResolverTest {
     @BeforeEach
     void setUp() throws Exception {
         this.supportedMethodParameter = getParameterOfMethod("supportedMethod", Searchable.class);
-        this.resolver = new SearchableHandlerMethodArgumentResolver();
+        GenericConversionService conversionService = new DefaultConversionService();
+        this.resolver = new SearchableHandlerMethodArgumentResolver(conversionService);
     }
 
     @Test
