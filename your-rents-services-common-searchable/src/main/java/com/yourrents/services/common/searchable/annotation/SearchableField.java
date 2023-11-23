@@ -49,6 +49,13 @@ public @interface SearchableField {
     String name() default "";
 
     /**
+     * The type to which this field should be converted.
+     * 
+     * @return the type to which this field should be converted
+     */
+    Class<?> type() default String.class;
+
+    /**
      * The number of times this field can be repeated in the OpenAPI documentation.
      * 
      * @return the number of times this field can be repeated in the OpenAPI.

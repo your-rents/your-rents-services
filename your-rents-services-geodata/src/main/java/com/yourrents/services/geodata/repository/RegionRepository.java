@@ -209,8 +209,8 @@ public class RegionRepository {
 	private Field<?> getSupportedField(String field) {
 		return switch (field) {
 			case "name" -> REGION.NAME;
-			case "uuid" -> REGION.EXTERNAL_ID.cast(String.class);
-			case "country.localName" -> REGION.country().LOCAL_NAME.cast(String.class);
+			case "uuid" -> REGION.EXTERNAL_ID;
+			case "country.localName" -> REGION.country().LOCAL_NAME;
 			default -> throw new IllegalArgumentException(
 					"Unexpected value for filter/sort field: " + field);
 		};

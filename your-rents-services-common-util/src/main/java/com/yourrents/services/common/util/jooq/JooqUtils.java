@@ -99,9 +99,9 @@ public class JooqUtils {
                                 .map(c -> {
                                         Field<?> field = fieldMapper.apply(c.getField().toString());
                                         return buildStringCondition(
-                                                        field.coerce(String.class),
+                                                        field,
                                                         c.getOperator().toString(),
-                                                        c.getValue().toString());
+                                                        c.getValue());
                                 }).reduce(trueCondition(), Condition::and);
         }
 
@@ -153,18 +153,19 @@ public class JooqUtils {
          * @param value
          * @return
          */
-        private Condition buildStringCondition(Field<String> field, String operator, String value) {
+        private Condition buildStringCondition(Field<?> field, String operator, Object value) {
+                Field<Object> objField = field.coerce(Object.class);
                 return switch (operator) {
-                        case "eq" -> field.eq(value);
-                        case "ne" -> field.ne(value);
-                        case "gt" -> field.gt(value);
-                        case "ge" -> field.ge(value);
-                        case "lt" -> field.lt(value);
-                        case "le" -> field.le(value);
-                        case "contains" -> field.contains(value);
-                        case "containsIgnoreCase" -> field.containsIgnoreCase(value);
-                        case "startsWith" -> field.startsWith(value);
-                        case "endsWith" -> field.endsWith(value);
+                        case "eq" -> objField.eq(value);
+                        case "ne" -> objField.ne(value);
+                        case "gt" -> objField.gt(value);
+                        case "ge" -> objField.ge(value);
+                        case "lt" -> objField.lt(value);
+                        case "le" -> objField.le(value);
+                        case "contains" -> field.cast(String.class).contains(value.toString());
+                        case "containsIgnoreCase" -> field.cast(String.class).containsIgnoreCase(value.toString());
+                        case "startsWith" -> field.cast(String.class).startsWith(value.toString());
+                        case "endsWith" -> field.cast(String.class).endsWith(value.toString());
                         default -> throw new IllegalArgumentException("Unsupported operator: " + operator);
                 };
         }

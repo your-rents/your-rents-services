@@ -23,6 +23,8 @@ package com.yourrents.services.common.searchable;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
@@ -30,14 +32,13 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-
 import com.yourrents.services.common.searchable.annotation.SearchableDefault;
+import com.yourrents.services.common.searchable.annotation.SearchableField;
 
 class SearchableHandlerMethodArgumentResolverTest {
 
     MethodParameter supportedMethodParameter;
-    HandlerMethodArgumentResolver resolver;
+    SearchableHandlerMethodArgumentResolver resolver;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -57,7 +58,6 @@ class SearchableHandlerMethodArgumentResolverTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     void testResolveArgumentWithFilterValueRequestParams() throws Exception {
         var request = new MockHttpServletRequest();
         request.addParameter("filter.field1.value", "A value for field1");
@@ -73,14 +73,13 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions).hasSize(2);
         assertThat(conditions.get(0).getField()).isEqualTo("field1");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field1");
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
         assertThat(conditions.get(1).getField()).isEqualTo("field2");
         assertThat(conditions.get(1).getValue()).isEqualTo("A value for field2");
-        assertThat(conditions.get(1).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(1).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
     }
 
     @Test
-    @SuppressWarnings("null")
     void testResolveArgumentWithFilterValueRequestParamsWithComplexName() throws Exception {
         var request = new MockHttpServletRequest();
         request.addParameter("filter.parent.field.value", "A value for field in parent");
@@ -95,11 +94,10 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions).hasSize(1);
         assertThat(conditions.get(0).getField()).isEqualTo("parent.field");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field in parent");
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
     }
 
     @Test
-    @SuppressWarnings("null")
     void testResolveArgumentWithAllFilterRequestParams() throws Exception {
         var request = new MockHttpServletRequest();
         request.addParameter("filter.key1.field", "field1");
@@ -126,7 +124,6 @@ class SearchableHandlerMethodArgumentResolverTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     void testResolveArgumentWithFilterPrefix() throws Exception {
         MethodParameter methodWithPrefixConfiguration = getParameterOfMethod("methodWithPrefixConfiguration",
                 Searchable.class);
@@ -144,6 +141,50 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions).hasSize(1);
         assertThat(conditions.get(0).getField()).isEqualTo("field");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field");
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
+    }
+
+    @Test
+    void testResolveArgumentWithIntegerSearchParam() throws Exception {
+        MethodParameter methodWithIntegerSearchParam = getParameterOfMethod("methodWithIntegerSearchParam",
+                Searchable.class);
+
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.field.value", "123");
+
+        assertThat(resolver.supportsParameter(methodWithIntegerSearchParam)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(methodWithIntegerSearchParam, null,
+                new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getField()).isEqualTo("field");
+        assertThat(conditions.get(0).getValue()).isEqualTo(123);
+        assertThat(conditions.get(0).getValue()).isInstanceOf(Integer.class);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+    }
+
+    @Test
+    void testResolveArgumentWithUUIDSearchParam() throws Exception {
+        MethodParameter methodWithIntegerSearchParam = getParameterOfMethod("methodWithUUIDSearchParam",
+                Searchable.class);
+
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.field.value", "0000-0000-0000-0000-0001");
+
+        assertThat(resolver.supportsParameter(methodWithIntegerSearchParam)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(methodWithIntegerSearchParam, null,
+                new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getField()).isEqualTo("field");
+        assertThat(conditions.get(0).getValue()).isEqualTo(UUID.fromString("0000-0000-0000-0000-0001"));
+        assertThat(conditions.get(0).getValue()).isInstanceOf(UUID.class);
         assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
     }
 
@@ -165,5 +206,14 @@ class SearchableHandlerMethodArgumentResolverTest {
         void unsupportedMethod(String string);
 
         void methodWithPrefixConfiguration(@SearchableDefault(prefix = "customPrefix") Searchable searchable);
+
+        void methodWithIntegerSearchParam(
+                @SearchableDefault(supportedFields = {
+                        @SearchableField(name = "field", type = Integer.class) }) Searchable searchable);
+
+        void methodWithUUIDSearchParam(
+                @SearchableDefault(supportedFields = {
+                        @SearchableField(name = "field", type = UUID.class) }) Searchable searchable);
+
     }
 }

@@ -215,8 +215,8 @@ public class ProvinceRepository {
 	private Field<?> getSupportedField(String field) {
 		return switch (field) {
 			case "name" -> PROVINCE.NAME;
-			case "uuid" -> PROVINCE.EXTERNAL_ID.cast(String.class);
-			case "region.name" -> PROVINCE.region().NAME.cast(String.class);
+			case "uuid" -> PROVINCE.EXTERNAL_ID;
+			case "region.name" -> PROVINCE.region().NAME;
 			default -> throw new IllegalArgumentException(
 					"Unexpected value for filter/sort field: " + field);
 		};

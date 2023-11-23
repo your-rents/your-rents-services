@@ -21,11 +21,17 @@ package com.yourrents.services.common.searchable;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.lang.Nullable;
@@ -35,13 +41,20 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.yourrents.services.common.searchable.annotation.SearchableDefault;
+import com.yourrents.services.common.searchable.annotation.SearchableField;
 
-public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class SearchableHandlerMethodArgumentResolver
+        implements HandlerMethodArgumentResolver, ApplicationContextAware, InitializingBean {
     private static final String DEFAULT_FILTER_PREFIX = "filter";
-    public static final String DEFAULT_OPERATOR = "containsIgnoreCase";
+    public static final String DEFAULT_OPERATOR = "eq";
+    public static final String DEFAULT_STRING_OPERATOR = "containsIgnoreCase";
     private static final Logger log = LoggerFactory.getLogger(SearchableHandlerMethodArgumentResolver.class);
 
+    private ApplicationContext applicationContext;
     private GenericConversionService conversionService;
+
+    public SearchableHandlerMethodArgumentResolver() {
+    }
 
     public SearchableHandlerMethodArgumentResolver(GenericConversionService conversionService) {
         this.conversionService = conversionService;
@@ -73,7 +86,7 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
                     filterKeys.add(key);
                     String field = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".field"), key);
                     String operator = Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".operator"),
-                            DEFAULT_OPERATOR);
+                            getDefaultOperator(field, parameter));
                     Object value = convertValue(field,
                             Objects.requireNonNullElse(webRequest.getParameter(filterBase + ".value"), ""),
                             parameter);
@@ -86,6 +99,7 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
         return result;
     }
 
+
     private String getFilterPrefix(MethodParameter parameter) {
         String result = DEFAULT_FILTER_PREFIX;
         SearchableDefault defaults = parameter.getParameterAnnotation(SearchableDefault.class);
@@ -95,8 +109,50 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
         return result + ".";
     }
 
+    private String getDefaultOperator(String field, MethodParameter parameter) {
+        String result = DEFAULT_STRING_OPERATOR;
+        SearchableDefault defaults = parameter.getParameterAnnotation(SearchableDefault.class);
+        if (defaults != null) {
+            Optional<SearchableField> searchableField = Arrays.stream(defaults.supportedFields())
+                    .filter(sf -> sf.name().equals(field))
+                    .findFirst();
+            if (searchableField.isPresent()) {
+                Class<?> targetType = searchableField.get().type();
+                if (targetType != String.class) {
+                    result = DEFAULT_OPERATOR;
+                }
+            }
+        }
+        return result;
+    }
+
     private Object convertValue(String field, String stringValue, MethodParameter parameter) {
-        return stringValue;
+        Object result = stringValue;
+        SearchableDefault defaults = parameter.getParameterAnnotation(SearchableDefault.class);
+        if (defaults != null) {
+            Optional<SearchableField> searchableField = Arrays.stream(defaults.supportedFields())
+                    .filter(sf -> sf.name().equals(field))
+                    .findFirst();
+            if (searchableField.isPresent()) {
+                Class<?> targetType = searchableField.get().type();
+                if (targetType != String.class) {
+                    result = conversionService.convert(stringValue, targetType);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (this.conversionService == null) {
+            this.conversionService = applicationContext.getBean(GenericConversionService.class);
+        }
     }
 
 }

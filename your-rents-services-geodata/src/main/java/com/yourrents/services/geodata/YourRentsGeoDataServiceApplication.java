@@ -25,8 +25,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.convert.support.GenericConversionService;
-
 import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
 import com.yourrents.services.common.searchable.springdoc.SearchableOpenAPIConverter;
 import com.yourrents.services.common.searchable.springdoc.customizer.SearchableOperationCustomizer;
@@ -41,9 +39,8 @@ public class YourRentsGeoDataServiceApplication {
 	}
 
 	@Bean
-	public SearchableArgumentResolverConfigurer searchableArgumentResolverConfigurer(
-			GenericConversionService conversionService) {
-		return new SearchableArgumentResolverConfigurer(conversionService);
+	public SearchableArgumentResolverConfigurer searchableArgumentResolverConfigurer() {
+		return new SearchableArgumentResolverConfigurer();
 	}
 
 	@Lazy(false)

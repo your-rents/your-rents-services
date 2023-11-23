@@ -168,7 +168,7 @@ class CityRepositoryTest {
         Page<City> cityInVeronaProvince = cityRepository.find(filterForVerona, PageRequest.ofSize(1));
         UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
 
-        Searchable filter = FilterCriteria.of(FilterCondition.of("province.uuid", "eq", veronaUuid.toString()));
+        Searchable filter = FilterCriteria.of(FilterCondition.of("province.uuid", "eq", veronaUuid));
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("name")));
         Page<City> result = cityRepository.find(filter, pageable);
         assertThat(result, iterableWithSize(96));

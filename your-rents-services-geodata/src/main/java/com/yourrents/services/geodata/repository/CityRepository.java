@@ -200,9 +200,9 @@ public class CityRepository {
         private Field<?> getSupportedField(String field) {
                 return switch (field) {
                         case "name" -> CITY.NAME;
-                        case "uuid" -> CITY.EXTERNAL_ID.cast(String.class);
+                        case "uuid" -> CITY.EXTERNAL_ID;
                         case "province.name" -> CITY.province().NAME;
-                        case "province.uuid" -> CITY.province().EXTERNAL_ID.cast(String.class);
+                        case "province.uuid" -> CITY.province().EXTERNAL_ID;
                         default ->
                                 throw new IllegalArgumentException(
                                                 "Unexpected value for filter/sort field: " + field);
