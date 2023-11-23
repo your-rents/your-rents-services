@@ -45,7 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class RegionControllerTest {
 
-	static final int NUM_REGIONS = 20;
+  static final int NUM_REGIONS = 21;//there are test data regions
 	final static String REGION_URL = "/regions";
 	@Autowired
 	MockMvc mvc;
@@ -79,9 +79,10 @@ class RegionControllerTest {
 
 	@Test
 	void getAllRegionsWithDefaultPagination() throws Exception {
-		mvc.perform(get(basePath + REGION_URL)
+    mvc.perform(get(basePath + REGION_URL)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
+
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.content").isArray())
 				.andExpect(jsonPath("$.content", hasSize(20)))
@@ -89,7 +90,7 @@ class RegionControllerTest {
 				.andExpect(jsonPath("$.content[19].name", is("Veneto")))
 				.andExpect(jsonPath("$.totalPages", is(numOfPages(NUM_REGIONS, 20))))
 				.andExpect(jsonPath("$.totalElements", is(NUM_REGIONS)))
-				.andExpect(jsonPath("$.last", is(true)))
+        .andExpect(jsonPath("$.last", is(false)))
 				.andExpect(jsonPath("$.first", is(true)))
 				.andExpect(jsonPath("$.size", is(20)))
 				.andExpect(jsonPath("$.number", is(0)))
