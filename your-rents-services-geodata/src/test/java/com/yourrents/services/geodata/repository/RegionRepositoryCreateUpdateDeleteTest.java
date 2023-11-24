@@ -30,7 +30,7 @@ import com.yourrents.services.common.util.exception.DataConflictException;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.Region;
-import com.yourrents.services.geodata.model.Region.Country;
+import com.yourrents.services.geodata.model.Region.RegionCountry;
 import com.yourrents.services.geodata.model.RegionLocalData;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @Transactional
-class RegionRepositoryUpdateDeleteCreateTest {
+class RegionRepositoryCreateUpdateDeleteTest {
 
 	@Autowired
 	RegionRepository regionRepository;
@@ -58,7 +58,7 @@ class RegionRepositoryUpdateDeleteCreateTest {
 		UUID italyUuid = findItalyUuid();
 		Region newRegion = new Region(null, "New Region",
 				new RegionLocalData("NR"),
-				new Country(italyUuid, null));
+				new RegionCountry(italyUuid, null));
 
 		Region result = regionRepository.create(newRegion);
 
@@ -77,7 +77,7 @@ class RegionRepositoryUpdateDeleteCreateTest {
     UUID randomUUID = UUID.randomUUID();
     Region newRegion = new Region(null, "New Region",
         null,
-        new Region.Country(randomUUID, null));
+        new RegionCountry(randomUUID, null));
     assertThatExceptionOfType(DataNotFoundException.class).isThrownBy(() ->
             regionRepository.create(newRegion))
         .withMessageContaining(randomUUID.toString())
@@ -97,7 +97,7 @@ class RegionRepositoryUpdateDeleteCreateTest {
   }
 
   @Test
-  void deleteAnExistingRegionWithCities() {
+  void deleteAnExistingRegionWithProvinces() {
     Searchable filterForVeneto = FilterCriteria.of(
         FilterCondition.of("name", "eq", "Veneto"));
     Page<Region> page = regionRepository.find(filterForVeneto,
@@ -110,7 +110,7 @@ class RegionRepositoryUpdateDeleteCreateTest {
   }
 
   @Test
-  void deleteAnExistingRegionWithNoCities() {
+  void deleteAnExistingRegionWithNoProvinces() {
     //given
     Searchable filterForNewRegion = FilterCriteria.of(
         FilterCondition.of("name", "eq", "ZZZ No Provinces Region"));
@@ -142,7 +142,7 @@ class RegionRepositoryUpdateDeleteCreateTest {
 
     Region updateRegion = new Region(null, "Update Region",
         new RegionLocalData("11"),
-        new Region.Country(countryId, null));
+        new RegionCountry(countryId, null));
     //when
     Region result = regionRepository.update(region.uuid(), updateRegion);
     //then

@@ -47,11 +47,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.yourrents.services.geodata.model.Country;
 
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
-class RegionControllerUpdateDeleteCreateTest {
+@Transactional
+class RegionControllerCreateUpdateDeleteTest {
 
   static final int NUM_REGIONS = 21;//there are test data regions
   final static String REGION_URL = "/regions";
@@ -110,7 +114,7 @@ class RegionControllerUpdateDeleteCreateTest {
   void updateAnExistingRegion() throws Exception {
     //given
     UUID countryUuid = countryRepository.findById(1)
-        .map(com.yourrents.services.geodata.model.Country::uuid)
+        .map(Country::uuid)
         .orElseThrow(RuntimeException::new);
     Region region = regionRepository
         .findById(1).orElseThrow(RuntimeException::new);
