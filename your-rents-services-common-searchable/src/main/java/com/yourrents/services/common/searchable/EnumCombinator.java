@@ -20,9 +20,6 @@ package com.yourrents.services.common.searchable;
  * #L%
  */
 
-import java.util.List;
-
-public interface Searchable {
-    List<? extends SearchCondition<?, ?, ?>> getFilter();
-    Object getCombinator();
+public enum EnumCombinator {
+    AND, OR
 }

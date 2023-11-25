@@ -22,6 +22,7 @@ package com.yourrents.services.common.util.jooq;
 
 import static org.jooq.impl.DSL.*;
 
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 import org.jooq.Condition;
@@ -32,13 +33,17 @@ import org.jooq.SelectFinalStep;
 import org.jooq.SelectQuery;
 import org.jooq.SortField;
 import org.jooq.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.yourrents.services.common.searchable.EnumCombinator;
 import com.yourrents.services.common.searchable.Searchable;
 
 @Service
 public class JooqUtils {
+        private static final Logger log = LoggerFactory.getLogger(JooqUtils.class);
 
         public JooqUtils() {
         }
@@ -49,7 +54,7 @@ public class JooqUtils {
          * Inspired by:
          * https://blog.jooq.org/calculating-pagination-metadata-without-extra-roundtrips-in-sql/
          * 
-         * @author Lucio Benfante 
+         * @author Lucio Benfante
          * 
          * @param ctx
          * @param original
@@ -94,15 +99,22 @@ public class JooqUtils {
 
         private Condition getCondition(Searchable filter, Function<String, Field<?>> fieldMapper,
                         boolean ignoreNotSupported) {
+                BinaryOperator<Condition> combinator = filter.getCombinator() == EnumCombinator.AND
+                                ? Condition::and
+                                : Condition::or;
+                Condition identity = filter.getCombinator() == EnumCombinator.AND
+                                ? trueCondition()
+                                : falseCondition();
                 return filter.getFilter().stream()
-                                .filter(c -> !ignoreNotSupported || isFieldSupported(c.getField().toString(), fieldMapper))
+                                .filter(c -> !ignoreNotSupported
+                                                || isFieldSupported(c.getField().toString(), fieldMapper))
                                 .map(c -> {
                                         Field<?> field = fieldMapper.apply(c.getField().toString());
                                         return buildStringCondition(
                                                         field,
                                                         c.getOperator().toString(),
                                                         c.getValue());
-                                }).reduce(trueCondition(), Condition::and);
+                                }).reduce(identity, combinator);
         }
 
         private SortField<?>[] getSortFields(Pageable pageable, Function<String, Field<?>> fieldMapper) {
@@ -142,6 +154,7 @@ public class JooqUtils {
                 SelectQuery<?> result = query.getQuery();
                 result.addConditions(getCondition(filter, filterFieldMapper));
                 result.addOrderBy(getSortFields(pageable, sortFieldMapper));
+                log.debug("Query with conditions and sorts: {}", result);
                 return result;
         }
 
@@ -154,19 +167,24 @@ public class JooqUtils {
          * @return
          */
         private Condition buildStringCondition(Field<?> field, String operator, Object value) {
-                Field<Object> objField = field.coerce(Object.class);
-                return switch (operator) {
-                        case "eq" -> objField.eq(value);
-                        case "ne" -> objField.ne(value);
-                        case "gt" -> objField.gt(value);
-                        case "ge" -> objField.ge(value);
-                        case "lt" -> objField.lt(value);
-                        case "le" -> objField.le(value);
-                        case "contains" -> field.cast(String.class).contains(value.toString());
-                        case "containsIgnoreCase" -> field.cast(String.class).containsIgnoreCase(value.toString());
-                        case "startsWith" -> field.cast(String.class).startsWith(value.toString());
-                        case "endsWith" -> field.cast(String.class).endsWith(value.toString());
-                        default -> throw new IllegalArgumentException("Unsupported operator: " + operator);
-                };
+                if (value != null) {
+                        Field<Object> objField = field.coerce(Object.class);
+                        return switch (operator) {
+                                case "eq" -> objField.eq(value);
+                                case "ne" -> objField.ne(value);
+                                case "gt" -> objField.gt(value);
+                                case "ge" -> objField.ge(value);
+                                case "lt" -> objField.lt(value);
+                                case "le" -> objField.le(value);
+                                case "contains" -> field.cast(String.class).contains(value.toString());
+                                case "containsIgnoreCase" ->
+                                        field.cast(String.class).containsIgnoreCase(value.toString());
+                                case "startsWith" -> field.cast(String.class).startsWith(value.toString());
+                                case "endsWith" -> field.cast(String.class).endsWith(value.toString());
+                                default -> throw new IllegalArgumentException("Unsupported operator: " + operator);
+                        };
+                } else {
+                        return trueCondition();
+                }
         }
 }

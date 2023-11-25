@@ -26,6 +26,7 @@ import java.util.List;
 
 public class FilterCriteria implements Searchable {
     private List<FilterCondition> conditions;
+    private EnumCombinator combinator = EnumCombinator.AND;
 
     public FilterCriteria() {
         this.conditions = new ArrayList<>();
@@ -33,6 +34,11 @@ public class FilterCriteria implements Searchable {
 
     public FilterCriteria(List<FilterCondition> conditions) {
         this.conditions = conditions;
+    }
+
+    public FilterCriteria(List<FilterCondition> conditions, EnumCombinator combinator) {
+        this.conditions = conditions;
+        this.combinator = combinator;
     }
 
     public static FilterCriteria of(FilterCondition... conditions) {
@@ -44,14 +50,24 @@ public class FilterCriteria implements Searchable {
         return this;
     }
 
+    public FilterCriteria combinator(EnumCombinator combinator) {
+        this.combinator = combinator;
+        return this;
+    }
+
     @Override
     public List<FilterCondition> getFilter() {
         return this.conditions;
     }
 
     @Override
+    public EnumCombinator getCombinator() {
+        return this.combinator;
+    }
+
+    @Override
     public String toString() {
-        return "FilterCriteria [conditions=" + conditions + "]";
+        return "FilterCriteria [conditions=" + conditions + ", combinator=" + combinator + "]";
     }
 
 }

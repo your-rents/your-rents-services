@@ -73,10 +73,10 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions).hasSize(2);
         assertThat(conditions.get(0).getField()).isEqualTo("field1");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field1");
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_STRING_OPERATOR);
         assertThat(conditions.get(1).getField()).isEqualTo("field2");
         assertThat(conditions.get(1).getValue()).isEqualTo("A value for field2");
-        assertThat(conditions.get(1).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
+        assertThat(conditions.get(1).getOperator()).isEqualTo(SearchableDefault.DEFAULT_STRING_OPERATOR);
     }
 
     @Test
@@ -94,7 +94,7 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions).hasSize(1);
         assertThat(conditions.get(0).getField()).isEqualTo("parent.field");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field in parent");
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_STRING_OPERATOR);
     }
 
     @Test
@@ -124,6 +124,28 @@ class SearchableHandlerMethodArgumentResolverTest {
     }
 
     @Test
+    void testResolveArgumentWithCombinatorParam() throws Exception {
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.key1.field", "field1");
+        request.addParameter("filter.key1.operator", "An operator for field1");
+        request.addParameter("filter.key1.value", "A value for field1");
+        request.addParameter("filter.config.combinator", "OR");
+
+        assertThat(resolver.supportsParameter(supportedMethodParameter)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(supportedMethodParameter, null,
+                new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getField()).isEqualTo("field1");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field1");
+        assertThat(conditions.get(0).getOperator()).isEqualTo("An operator for field1");
+        assertThat(result.getCombinator()).isEqualTo(EnumCombinator.OR);
+    }
+
+    @Test
     void testResolveArgumentWithFilterPrefix() throws Exception {
         MethodParameter methodWithPrefixConfiguration = getParameterOfMethod("methodWithPrefixConfiguration",
                 Searchable.class);
@@ -141,7 +163,30 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions).hasSize(1);
         assertThat(conditions.get(0).getField()).isEqualTo("field");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field");
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_STRING_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_STRING_OPERATOR);
+    }
+
+    @Test
+    void testResolveArgumentWithConfigKeyConfiguration() throws Exception {
+        MethodParameter methodWithConfigKeyConfiguration = getParameterOfMethod("methodWithConfigKeyConfiguration",
+                Searchable.class);
+
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.field.value", "A value for field");
+        request.addParameter("filter.customConfigKey.combinator", "OR");
+
+        assertThat(resolver.supportsParameter(methodWithConfigKeyConfiguration)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(methodWithConfigKeyConfiguration, null,
+                new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(1);
+        assertThat(conditions.get(0).getField()).isEqualTo("field");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field");
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_STRING_OPERATOR);
+        assertThat(result.getCombinator()).isEqualTo(EnumCombinator.OR);
     }
 
     @Test
@@ -163,7 +208,7 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions.get(0).getField()).isEqualTo("field");
         assertThat(conditions.get(0).getValue()).isEqualTo(123);
         assertThat(conditions.get(0).getValue()).isInstanceOf(Integer.class);
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_OPERATOR);
     }
 
     @Test
@@ -185,7 +230,7 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions.get(0).getField()).isEqualTo("field");
         assertThat(conditions.get(0).getValue()).isEqualTo(UUID.fromString("0000-0000-0000-0000-0001"));
         assertThat(conditions.get(0).getValue()).isInstanceOf(UUID.class);
-        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableHandlerMethodArgumentResolver.DEFAULT_OPERATOR);
+        assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_OPERATOR);
     }
 
     private Class<?> getControllerClass() {
@@ -206,6 +251,8 @@ class SearchableHandlerMethodArgumentResolverTest {
         void unsupportedMethod(String string);
 
         void methodWithPrefixConfiguration(@SearchableDefault(prefix = "customPrefix") Searchable searchable);
+
+        void methodWithConfigKeyConfiguration(@SearchableDefault(configKey = "customConfigKey") Searchable searchable);
 
         void methodWithIntegerSearchParam(
                 @SearchableDefault(supportedFields = {

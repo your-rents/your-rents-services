@@ -148,6 +148,36 @@ class CityControllerTest {
     }
 
     @Test
+    void testSearchCitiesByEqualsMultipleNamesWithOrCombinator() throws Exception {
+        mvc.perform(get(basePath + "/cities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("filter.name.k1.field", "name")
+                .param("filter.name.k1.operator", "eq")
+                .param("filter.name.k1.value", "San Bonifacio")
+                .param("filter.name.k2.field", "name")
+                .param("filter.name.k2.operator", "eq")
+                .param("filter.name.k2.value", "Spinea")
+                .param("filter.config.combinator", "OR")
+                .param("page", "0")
+                .param("size", Integer.toString(Integer.MAX_VALUE)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].name", is("San Bonifacio")))
+                .andExpect(jsonPath("$.content[1].name", is("Spinea")))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.last", is(true)))
+                .andExpect(jsonPath("$.first", is(true)))
+                .andExpect(jsonPath("$.size", is(Integer.MAX_VALUE)))
+                .andExpect(jsonPath("$.number", is(0)))
+                .andExpect(jsonPath("$.numberOfElements", is(2)))
+                .andExpect(jsonPath("$.empty", is(false)))
+                .andExpect(jsonPath("$.sort.sorted", is(true)));
+    }
+
+    @Test
     void testSearchCityByProvinceName() throws Exception {
         mvc.perform(get(basePath + "/cities")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -25,6 +25,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
+
 import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
 import com.yourrents.services.common.searchable.springdoc.SearchableOpenAPIConverter;
 import com.yourrents.services.common.searchable.springdoc.customizer.SearchableOperationCustomizer;

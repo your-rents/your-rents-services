@@ -38,6 +38,13 @@ import com.yourrents.services.common.searchable.Searchable;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface SearchableDefault {
+    public String DEFAULT_CONFIG_KEY = "config";
+    public String DEFAULT_FILTER_PREFIX = "filter";
+    public int DEFAULT_REPEAT = 1;
+    public String DEFAULT_SEPARATOR = ".";
+    String DEFAULT_OPERATOR = "eq";
+    String DEFAULT_STRING_OPERATOR = "containsIgnoreCase";
+
     /**
      * Alias for {@link #supportedFields()}.
      * 
@@ -60,14 +67,21 @@ public @interface SearchableDefault {
      * 
      * @return the default number of repeated search parameters in the OpenAPI
      */
-    int repeatDefault() default 1;
+    int repeatDefault() default DEFAULT_REPEAT;
 
     /**
      * The prefix to use for each parameter.
      * 
      * @return the prefix to use for each parameter
      */
-    String prefix() default "filter";
+    String prefix() default DEFAULT_FILTER_PREFIX;
+
+    /**
+     * The reserved key used to specify the config parameters.
+     * 
+     * @return the reserved key used to specify the config parameters
+     */
+    String configKey() default DEFAULT_CONFIG_KEY;
 
     /**
      * Hide the OpenAPI documentation generation for this parameter.

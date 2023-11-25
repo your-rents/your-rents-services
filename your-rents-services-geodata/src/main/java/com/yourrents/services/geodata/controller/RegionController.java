@@ -57,8 +57,7 @@ class RegionController {
 	@GetMapping
 	public ResponseEntity<Page<Region>> getRegions(
 			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid", type = UUID.class),
-					@SearchableField("name"),
-					@SearchableField("country.localName") }) Searchable filter,
+					@SearchableField("name"), @SearchableField("country.localName") }) Searchable filter,
 			@ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
 		Page<Region> page = regionRepository.find(filter, pagination);
 		return ResponseEntity.ok(page);
