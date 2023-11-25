@@ -38,6 +38,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import com.yourrents.services.common.searchable.annotation.OperatorDefault;
 import com.yourrents.services.common.searchable.annotation.SearchableDefault;
 import com.yourrents.services.common.searchable.annotation.SearchableField;
 
@@ -126,8 +127,25 @@ public class SearchableHandlerMethodArgumentResolver implements HandlerMethodArg
                     .findFirst();
             if (searchableField.isPresent()) {
                 Class<?> targetType = searchableField.get().type();
-                if (targetType != String.class) {
-                    result = SearchableDefault.DEFAULT_OPERATOR;
+                Optional<OperatorDefault> operatorDefault = Arrays.stream(defaults.defaultOperators())
+                        .filter(od -> od.type().isAssignableFrom(targetType))
+                        .findFirst();
+                if (operatorDefault.isPresent()) {
+                    result = operatorDefault.get().operator();
+                } else {
+                    if (targetType != String.class) {
+                        result = SearchableDefault.DEFAULT_OPERATOR;
+                    }
+                }
+            } else {
+                Class<?> targetType = String.class;
+                Optional<OperatorDefault> operatorDefault = Arrays.stream(defaults.defaultOperators())
+                        .filter(od -> od.type().isAssignableFrom(targetType))
+                        .findFirst();
+                if (operatorDefault.isPresent()) {
+                    result = operatorDefault.get().operator();
+                } else {
+                    result = SearchableDefault.DEFAULT_STRING_OPERATOR;
                 }
             }
         }

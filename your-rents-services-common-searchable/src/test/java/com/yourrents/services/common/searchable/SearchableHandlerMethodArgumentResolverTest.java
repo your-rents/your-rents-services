@@ -34,6 +34,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import com.yourrents.services.common.searchable.annotation.SearchableDefault;
 import com.yourrents.services.common.searchable.annotation.SearchableField;
+import com.yourrents.services.common.searchable.annotation.OperatorDefault;
 
 class SearchableHandlerMethodArgumentResolverTest {
 
@@ -95,6 +96,44 @@ class SearchableHandlerMethodArgumentResolverTest {
         assertThat(conditions.get(0).getField()).isEqualTo("parent.field");
         assertThat(conditions.get(0).getValue()).isEqualTo("A value for field in parent");
         assertThat(conditions.get(0).getOperator()).isEqualTo(SearchableDefault.DEFAULT_STRING_OPERATOR);
+    }
+
+    @Test
+    void testResolveArgumentWithCustomDefaultOperator() throws Exception {
+        MethodParameter methodWithDefaultOperatorConfiguration = getParameterOfMethod(
+                "methodWithDefaultOperatorConfiguration",
+                Searchable.class);
+        var request = new MockHttpServletRequest();
+        request.addParameter("filter.field1.value", "A value for field1");
+        request.addParameter("filter.field2.value", "A value for field2");
+        request.addParameter("filter.field3.value", "0000-0000-0000-0000-0001");
+        request.addParameter("filter.field4.value", "123");
+        request.addParameter("filter.field5.value", "A value for field5");
+        request.addParameter("filter.field5.operator", "field5SpecificOperator");
+
+        assertThat(resolver.supportsParameter(methodWithDefaultOperatorConfiguration)).isTrue();
+
+        Searchable result = (Searchable) resolver.resolveArgument(methodWithDefaultOperatorConfiguration, null,
+                new ServletWebRequest(request), null);
+        assertThat(result).isNotNull();
+        List<? extends SearchCondition<?, ?, ?>> conditions = result.getFilter();
+        assertThat(conditions).isNotNull();
+        assertThat(conditions).hasSize(5);
+        assertThat(conditions.get(0).getField()).isEqualTo("field1");
+        assertThat(conditions.get(0).getValue()).isEqualTo("A value for field1");
+        assertThat(conditions.get(0).getOperator()).isEqualTo("stringCustomDefaultOperator");
+        assertThat(conditions.get(1).getField()).isEqualTo("field2");
+        assertThat(conditions.get(1).getValue()).isEqualTo("A value for field2");
+        assertThat(conditions.get(1).getOperator()).isEqualTo("stringCustomDefaultOperator");
+        assertThat(conditions.get(2).getField()).isEqualTo("field3");
+        assertThat(conditions.get(2).getValue()).isEqualTo(UUID.fromString("0000-0000-0000-0000-0001"));
+        assertThat(conditions.get(2).getOperator()).isEqualTo("uuidCustomDefaultOperator");
+        assertThat(conditions.get(3).getField()).isEqualTo("field4");
+        assertThat(conditions.get(3).getValue()).isEqualTo(123);
+        assertThat(conditions.get(3).getOperator()).isEqualTo(SearchableDefault.DEFAULT_OPERATOR);
+        assertThat(conditions.get(4).getField()).isEqualTo("field5");
+        assertThat(conditions.get(4).getValue()).isEqualTo("A value for field5");
+        assertThat(conditions.get(4).getOperator()).isEqualTo("field5SpecificOperator");
     }
 
     @Test
@@ -262,5 +301,12 @@ class SearchableHandlerMethodArgumentResolverTest {
                 @SearchableDefault(supportedFields = {
                         @SearchableField(name = "field", type = UUID.class) }) Searchable searchable);
 
+        void methodWithDefaultOperatorConfiguration(
+                @SearchableDefault(supportedFields = {
+                        @SearchableField(name = "field2", type = String.class),
+                        @SearchableField(name = "field3", type = UUID.class),
+                        @SearchableField(name = "field4", type = Integer.class) }, defaultOperators = {
+                                @OperatorDefault(type = String.class, operator = "stringCustomDefaultOperator"),
+                                @OperatorDefault(type = UUID.class, operator = "uuidCustomDefaultOperator") }) Searchable searchable);
     }
 }

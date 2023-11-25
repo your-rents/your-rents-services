@@ -25,7 +25,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.springframework.core.annotation.AliasFor;
 
 import com.yourrents.services.common.searchable.Searchable;
@@ -82,6 +81,15 @@ public @interface SearchableDefault {
      * @return the reserved key used to specify the config parameters
      */
     String configKey() default DEFAULT_CONFIG_KEY;
+
+    /**
+     * The default operator to use for each type.
+     * 
+     * @return the default operator to use for each type
+     */
+    OperatorDefault[] defaultOperators() default {
+            @OperatorDefault(type = String.class, operator = DEFAULT_STRING_OPERATOR),
+            @OperatorDefault(type = Object.class, operator = DEFAULT_OPERATOR) };
 
     /**
      * Hide the OpenAPI documentation generation for this parameter.
