@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @Transactional
-class ProvinceRepositoryUpdateDeleteCreateTest {
+class ProvinceRepositoryCreateUpdateDeleteTest {
 
 
 	@Autowired
@@ -51,14 +51,14 @@ class ProvinceRepositoryUpdateDeleteCreateTest {
 
 	@Test
 	void createNewProvinceInVeneto() {
-
+    //given
 		UUID venetoUuid = findVenetoUuid();
 		Province newProvince = new Province(null, "New Province",
 				new ProvinceLocalData("10", "NP"),
 				new Province.Region(venetoUuid, null));
-
+    //when
 		Province result = provinceRepository.create(newProvince);
-
+    //then
 		assertThat(result).isNotNull();
 		assertThat(result.name()).isEqualTo("New Province");
 		assertThat(result.region().name()).isEqualTo("Veneto");
@@ -83,10 +83,13 @@ class ProvinceRepositoryUpdateDeleteCreateTest {
 
 	@Test
 	void createNewProvinceWithNoRegionAndNoLocalData() {
+    //given
 		Province newProvince = new Province(null, "New Province",
 				null,
 				null);
+    //when
 		Province result = provinceRepository.create(newProvince);
+    //then
 		assertThat(result).isNotNull();
 		assertThat(result.name()).isEqualTo("New Province");
 		assertThat(result.region()).isNull();
@@ -95,12 +98,14 @@ class ProvinceRepositoryUpdateDeleteCreateTest {
 
 	@Test
 	void deleteAnExistingProvince() {
+    //given
 		Searchable filterForVenezia = FilterCriteria.of(
 				FilterCondition.of("name", "eq", "Venezia"));
 		Page<Province> provincePage = provinceRepository.find(filterForVenezia,
 				PageRequest.ofSize(1));
 		Province province = provincePage.getContent().get(0);
 		UUID veneziaUuid = province.uuid();
+    //when-then
 		assertThatExceptionOfType(DataConflictException.class).isThrownBy(() ->
 						provinceRepository.delete(veneziaUuid))
 				.withMessageContaining(province.uuid().toString());
@@ -116,16 +121,16 @@ class ProvinceRepositoryUpdateDeleteCreateTest {
 
 	@Test
 	void updateAnExistingProvince() {
+    //given
 		Province province = provinceRepository.findById(1).orElseThrow(RuntimeException::new);
 		UUID venetoUuid = findVenetoUuid();
 		assertThat(province.region().uuid()).isNotEqualByComparingTo(venetoUuid);
-
 		Province updateProvince = new Province(null, "Update Province",
 				new ProvinceLocalData("11", "22"),
 				new Province.Region(venetoUuid, null));
-
+    //when
 		Province result = provinceRepository.update(province.uuid(), updateProvince);
-
+    //then
 		assertThat(result).isNotNull();
 		assertThat(result.name()).isEqualTo("Update Province");
 		assertThat(result.region().name()).isEqualTo("Veneto");

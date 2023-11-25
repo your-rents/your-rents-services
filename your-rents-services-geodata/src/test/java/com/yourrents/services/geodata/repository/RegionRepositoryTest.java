@@ -46,7 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class RegionRepositoryTest {
 
-  static final int NUM_REGIONS = 21;
+  static final int NUM_REGIONS = 20;
+  static final int NUM_REGIONS_TEST = 1;
+  static final int TOT_NUM_REGIONS = NUM_REGIONS + NUM_REGIONS_TEST;
 	static final int PAGE_SIZE = 5;
 
 	@Autowired
@@ -56,7 +58,7 @@ class RegionRepositoryTest {
 	void findAll() {
 		Page<Region> result = regionRepository.find(FilterCriteria.of(),
 				PageRequest.ofSize(Integer.MAX_VALUE));
-		assertThat(result, iterableWithSize(NUM_REGIONS));
+		assertThat(result, iterableWithSize(TOT_NUM_REGIONS));
 	}
 
 	@Test
@@ -81,8 +83,8 @@ class RegionRepositoryTest {
 
 	@Test
 	void findLastPageWithOrderByNameAsc() {
-		final int lastPage = lastPage(NUM_REGIONS, PAGE_SIZE);
-		final int numRecordsForPage = numRecordsInPage(NUM_REGIONS, PAGE_SIZE, lastPage);
+		final int lastPage = lastPage(TOT_NUM_REGIONS, PAGE_SIZE);
+		final int numRecordsForPage = numRecordsInPage(TOT_NUM_REGIONS, PAGE_SIZE, lastPage);
 		Pageable pageable = PageRequest.of(lastPage, PAGE_SIZE, Sort.by(Sort.Order.asc("name")));
 		Page<Region> page = regionRepository.find(FilterCriteria.of(), pageable);
 		assertThat(page, iterableWithSize(numRecordsForPage));
@@ -109,7 +111,7 @@ class RegionRepositoryTest {
   void findFilteredByCountryEquals() {
     FilterCriteria filter = FilterCriteria.of(FilterCondition.of("country.localName", "eq", "Italy"));
     Page<Region> result = regionRepository.find(filter, PageRequest.ofSize(Integer.MAX_VALUE));
-    assertThat(result, iterableWithSize(NUM_REGIONS));
+    assertThat(result, iterableWithSize(TOT_NUM_REGIONS));
   }
 
 	@Test
@@ -127,7 +129,7 @@ class RegionRepositoryTest {
 		Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE,
 				Sort.by(Sort.Order.asc("country.localName"), Sort.Order.desc("name")));
 		Page<Region> page = regionRepository.find(FilterCriteria.of(), pageable);
-		assertThat(page, iterableWithSize(NUM_REGIONS));
+		assertThat(page, iterableWithSize(TOT_NUM_REGIONS));
 		assertThat(page.getContent().get(0).country().localName(), equalTo("Italy"));
 	}
 

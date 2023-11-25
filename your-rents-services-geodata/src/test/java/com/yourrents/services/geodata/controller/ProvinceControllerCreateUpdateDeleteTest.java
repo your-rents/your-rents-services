@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(TestYourRentsGeoDataServiceApplication.class)
 @AutoConfigureMockMvc
 @Transactional
-class ProvinceControllerUpdateDeleteCreateTest {
+class ProvinceControllerCreateUpdateDeleteTest {
 
 	final static String PROVINCE_URL = "/provinces";
 	@Autowired

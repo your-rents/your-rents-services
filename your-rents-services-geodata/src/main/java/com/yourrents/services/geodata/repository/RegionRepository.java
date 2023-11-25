@@ -35,6 +35,7 @@ import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.jooq.tables.records.RegionLocalDataRecord;
 import com.yourrents.services.geodata.jooq.tables.records.RegionRecord;
 import com.yourrents.services.geodata.model.Region;
+import com.yourrents.services.geodata.model.Region.RegionCountry;
 import com.yourrents.services.geodata.model.RegionLocalData;
 import java.util.List;
 import java.util.Objects;
@@ -74,7 +75,7 @@ public class RegionRepository {
 						r.get("uuid", UUID.class),
 						r.get("name", String.class),
 						r.get("localData", RegionLocalData.class),
-						r.get("country", Region.Country.class))
+						r.get("country", RegionCountry.class))
 		);
 		int totalRows = Objects.requireNonNullElse(
 				result.fetchAny("total_rows", Integer.class), 0);
@@ -193,14 +194,14 @@ public class RegionRepository {
         .orElseThrow(() -> new RuntimeException("failed to update region: " + uuid));
   }
 
-	private SelectOnConditionStep<Record4<UUID, String, RegionLocalData, Region.Country>> getSelectRegionSpec() {
+	private SelectOnConditionStep<Record4<UUID, String, RegionLocalData, RegionCountry>> getSelectRegionSpec() {
 		return dsl.select(
 						REGION.EXTERNAL_ID.as("uuid"),
 						REGION.NAME.as("name"),
 						row(REGION_LOCAL_DATA.IT_CODICE_ISTAT)
 								.mapping(nullOnAllNull(RegionLocalData::new)).as("localData"),
 						row(COUNTRY.EXTERNAL_ID, COUNTRY.LOCAL_NAME)
-								.mapping(nullOnAllNull(Region.Country::new)).as("country"))
+								.mapping(nullOnAllNull(RegionCountry::new)).as("country"))
 				.from(REGION)
 				.leftJoin(REGION_LOCAL_DATA).on(REGION.ID.eq(REGION_LOCAL_DATA.ID))
 				.leftJoin(COUNTRY).on(REGION.COUNTRY_ID.eq(COUNTRY.ID));
