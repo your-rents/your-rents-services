@@ -66,7 +66,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
-		<common.spring-boot.version>3.1.5</common.spring-boot.version>
+		<common.spring-boot.version>3.2.0</common.spring-boot.version>
 	</properties>
 	<build>
 		<plugins>

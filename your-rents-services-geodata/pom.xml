@@ -15,11 +15,11 @@
 	<description>Geographical Data services for the YourRents applications</description>
 	<properties>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
-		<spring-boot.version>3.1.6</spring-boot.version>
+		<spring-boot.version>3.2.0</spring-boot.version>
 		<springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
 		<testcontainers-jooq-codegen-maven-plugin.version>0.0.3</testcontainers-jooq-codegen-maven-plugin.version>
-		<plugins.testcontainers.version>1.19.1</plugins.testcontainers.version>
-		<plugins.postgresql.version>42.6.0</plugins.postgresql.version>
+		<plugins.testcontainers.version>1.19.3</plugins.testcontainers.version>
+		<plugins.postgresql.version>42.7.0</plugins.postgresql.version>
 	</properties>
 	<dependencies>
 		<dependency>
