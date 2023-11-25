@@ -212,13 +212,13 @@ public class CountryRepository {
 
     private Field<?> getSupportedSortField(String field) {
         return switch (field) {
-			case "uuid" -> COUNTRY.EXTERNAL_ID.cast(String.class);
+			case "uuid" -> COUNTRY.EXTERNAL_ID;
 			case "isoCode" -> COUNTRY.ISO_CODE;
 			case "englishFullName" -> COUNTRY.ENGLISH_FULL_NAME;
 			case "iso3" -> COUNTRY.ISO_3;
 			case "localName" -> COUNTRY.LOCAL_NAME;
-			case "number" -> COUNTRY.NUMBER.cast(String.class);
-      case "continent.name" -> COUNTRY.continent().NAME.cast(String.class);
+			case "number" -> COUNTRY.NUMBER;
+      case "continent.name" -> COUNTRY.continent().NAME;
             default ->
                 throw new IllegalArgumentException(
                         "Unexpected value for filter/sort field: " + field);

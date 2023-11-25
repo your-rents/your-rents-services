@@ -40,6 +40,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yourrents.services.common.searchable.EnumCombinator;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import com.yourrents.services.common.searchable.Searchable;
@@ -98,6 +99,18 @@ class CityRepositoryTest {
         Page<City> result = cityRepository.find(filter, pageable);
         assertThat(result, iterableWithSize(1));
         assertThat(result.getContent().get(0).name(), equalTo("Abano Terme"));
+    }
+
+    @Test
+    void testFindFilteredByMultipleNamesWithOrCombinatorEqualsWithOrderByNameAsc() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.asc("name")));
+        FilterCriteria filter = FilterCriteria.of(FilterCondition.of("name", "eq", "San Bonifacio"),
+                FilterCondition.of("name", "eq", "Spinea"))
+                .combinator(EnumCombinator.OR);
+        Page<City> result = cityRepository.find(filter, pageable);
+        assertThat(result, iterableWithSize(2));
+        assertThat(result.getContent().get(0).name(), equalTo("San Bonifacio"));
+        assertThat(result.getContent().get(1).name(), equalTo("Spinea"));
     }
 
     @Test
@@ -168,7 +181,7 @@ class CityRepositoryTest {
         Page<City> cityInVeronaProvince = cityRepository.find(filterForVerona, PageRequest.ofSize(1));
         UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
 
-        Searchable filter = FilterCriteria.of(FilterCondition.of("province.uuid", "eq", veronaUuid.toString()));
+        Searchable filter = FilterCriteria.of(FilterCondition.of("province.uuid", "eq", veronaUuid));
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("name")));
         Page<City> result = cityRepository.find(filter, pageable);
         assertThat(result, iterableWithSize(96));

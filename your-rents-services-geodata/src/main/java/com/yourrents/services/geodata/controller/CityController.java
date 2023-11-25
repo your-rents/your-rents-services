@@ -53,7 +53,9 @@ class CityController {
 
     @GetMapping
     public Page<City> getCities(
-            @ParameterObject @SearchableDefault({ @SearchableField(name = "uuid"), @SearchableField("name"),
+            @ParameterObject @SearchableDefault({ @SearchableField(name = "uuid", type = UUID.class),
+                    @SearchableField("name"),
+                    @SearchableField(name = "province.uuid", type = UUID.class),
                     @SearchableField("province.name") }) Searchable filter,
             @ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
         return cityRepository.find(filter, pagination);

@@ -58,7 +58,8 @@ class ProvinceController {
 
 	@GetMapping
 	public ResponseEntity<Page<Province>> getProvinces(
-			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid"), @SearchableField("name"),
+			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid", type = UUID.class),
+					@SearchableField("name"),
 					@SearchableField("region.name") }) Searchable filter,
 			@ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
 		Page<Province> page = provinceRepository.find(filter, pagination);

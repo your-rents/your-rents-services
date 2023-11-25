@@ -56,8 +56,8 @@ class RegionController {
 
 	@GetMapping
 	public ResponseEntity<Page<Region>> getRegions(
-			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid"), @SearchableField("name"),
-					@SearchableField("country.localName") }) Searchable filter,
+			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid", type = UUID.class),
+					@SearchableField("name"), @SearchableField("country.localName") }) Searchable filter,
 			@ParameterObject @SortDefault(sort = "name", direction = Direction.ASC) Pageable pagination) {
 		Page<Region> page = regionRepository.find(filter, pagination);
 		return ResponseEntity.ok(page);
@@ -77,17 +77,17 @@ class RegionController {
 		return new ResponseEntity<>(result, HttpStatus.CREATED);
 	}
 
-  @PatchMapping("/{uuid}")
-  public ResponseEntity<Region> update(@PathVariable UUID uuid,
-      @RequestBody Region region) {
-    Region result = regionRepository.update(uuid, region);
-    return ResponseEntity.ok(result);
-  }
+	@PatchMapping("/{uuid}")
+	public ResponseEntity<Region> update(@PathVariable UUID uuid,
+			@RequestBody Region region) {
+		Region result = regionRepository.update(uuid, region);
+		return ResponseEntity.ok(result);
+	}
 
-  @DeleteMapping("/{uuid}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void delete(@PathVariable UUID uuid) {
-    regionRepository.delete(uuid);
-  }
+	@DeleteMapping("/{uuid}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void delete(@PathVariable UUID uuid) {
+		regionRepository.delete(uuid);
+	}
 
 }

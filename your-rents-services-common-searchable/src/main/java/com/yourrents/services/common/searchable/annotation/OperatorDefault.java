@@ -1,4 +1,4 @@
-package com.yourrents.services.common.searchable;
+package com.yourrents.services.common.searchable.annotation;
 
 /*-
  * #%L
@@ -20,9 +20,16 @@ package com.yourrents.services.common.searchable;
  * #L%
  */
 
-import java.util.List;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface Searchable {
-    List<? extends SearchCondition<?, ?, ?>> getFilter();
-    Object getCombinator();
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface OperatorDefault {
+    Class<?> type();
+    String operator();
 }

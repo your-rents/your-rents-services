@@ -32,7 +32,6 @@ import com.yourrents.services.common.searchable.springdoc.customizer.SearchableO
 import com.yourrents.services.common.util.exception.GlobalExceptionHandler;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 
-
 @SpringBootApplication
 public class YourRentsGeoDataServiceApplication {
 
@@ -49,7 +48,7 @@ public class YourRentsGeoDataServiceApplication {
 	@Bean
 	SearchableOpenAPIConverter searchableOpenAPIConverter(ObjectMapperProvider objectMapperProvider) {
 		return new SearchableOpenAPIConverter(objectMapperProvider);
-	}	
+	}
 
 	@Bean
 	SearchableOperationCustomizer searchableOperationCustomizer() {

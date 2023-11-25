@@ -57,9 +57,10 @@ class CountryController {
 
 	@GetMapping
 	public ResponseEntity<Page<Country>> getCountries(
-			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid"), @SearchableField("isoCode"),
-					@SearchableField("englishFullName"), @SearchableField("iso3"), @SearchableField("localName"),
-					@SearchableField("number") }) Searchable filter,
+			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid", type = UUID.class),
+					@SearchableField("isoCode"), @SearchableField("englishFullName"), @SearchableField("iso3"),
+					@SearchableField("localName"),
+					@SearchableField(name = "number", type = Integer.class) }) Searchable filter,
 			@ParameterObject @SortDefault(sort = "localName", direction = Direction.ASC) Pageable pagination) {
 		Page<Country> page = countryRepository.find(filter, pagination);
 		return ResponseEntity.ok(page);
