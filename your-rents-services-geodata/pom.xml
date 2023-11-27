@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.your-rents.services</groupId>
 		<artifactId>your-rents-services-parent</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>your-rents-services-geodata</artifactId>
 	<name>YourRents GeoData Service</name>
@@ -21,12 +21,12 @@
 		<dependency>
 			<groupId>com.your-rents.services</groupId>
 			<artifactId>your-rents-services-common-util</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.your-rents.services</groupId>
 			<artifactId>your-rents-services-common-searchable</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
