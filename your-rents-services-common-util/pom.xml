@@ -4,13 +4,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.yourrents.services</groupId>
+        <groupId>com.your-rents.services</groupId>
         <artifactId>your-rents-services-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
-    <groupId>com.yourrents.services</groupId>
     <artifactId>your-rents-services-common-util</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 	<name>YourRents Service Common Util</name>
 	<description>Common utils for services of the YourRents applications</description>
     <properties>
@@ -19,9 +17,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.yourrents.services</groupId>
+            <groupId>com.your-rents.services</groupId>
             <artifactId>your-rents-services-common-searchable</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
