@@ -9,9 +9,9 @@ package com.yourrents.services.geodata.controller;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,39 +49,40 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${yrs-geodata.api.basepath}/countries")
 class CountryController {
 
-	private final CountryRepository countryRepository;
+  private final CountryRepository countryRepository;
 
-	CountryController(CountryRepository countryRepository) {
-		this.countryRepository = countryRepository;
-	}
+  CountryController(CountryRepository countryRepository) {
+    this.countryRepository = countryRepository;
+  }
 
-	@GetMapping
-	public ResponseEntity<Page<Country>> getCountries(
-			@ParameterObject @SearchableDefault({ @SearchableField(name = "uuid", type = UUID.class),
-					@SearchableField("isoCode"), @SearchableField("englishFullName"), @SearchableField("iso3"),
-					@SearchableField("localName"),
-					@SearchableField(name = "number", type = Integer.class) }) Searchable filter,
-			@ParameterObject @SortDefault(sort = "localName", direction = Direction.ASC) Pageable pagination) {
-		Page<Country> page = countryRepository.find(filter, pagination);
-		return ResponseEntity.ok(page);
-	}
+  @GetMapping
+  ResponseEntity<Page<Country>> getCountries(
+      @ParameterObject @SearchableDefault({@SearchableField(name = "uuid", type = UUID.class),
+          @SearchableField("isoCode"), @SearchableField("englishFullName"),
+          @SearchableField("iso3"),
+          @SearchableField("localName"),
+          @SearchableField(name = "number", type = Integer.class)}) Searchable filter,
+      @ParameterObject @SortDefault(sort = "localName", direction = Direction.ASC) Pageable pagination) {
+    Page<Country> page = countryRepository.find(filter, pagination);
+    return ResponseEntity.ok(page);
+  }
 
-	@GetMapping("/{uuid}")
-	public ResponseEntity<Country> getByUuid(@PathVariable UUID uuid) {
-		Country country = countryRepository.findByExternalId(uuid)
-				.orElseThrow(
-						() -> new DataNotFoundException("can't find country having uuid: " + uuid));
-		return ResponseEntity.ok(country);
-	}
+  @GetMapping("/{uuid}")
+  ResponseEntity<Country> getByUuid(@PathVariable UUID uuid) {
+    Country country = countryRepository.findByExternalId(uuid)
+        .orElseThrow(
+            () -> new DataNotFoundException("can't find country having uuid: " + uuid));
+    return ResponseEntity.ok(country);
+  }
 
   @PostMapping
-  public ResponseEntity<Country> create(@RequestBody Country country) {
+  ResponseEntity<Country> create(@RequestBody Country country) {
     Country result = countryRepository.create(country);
     return new ResponseEntity<>(result, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
-  public ResponseEntity<Country> update(@PathVariable UUID uuid,
+  ResponseEntity<Country> update(@PathVariable UUID uuid,
       @RequestBody Country country) {
     Country result = countryRepository.update(uuid, country);
     return ResponseEntity.ok(result);
@@ -89,7 +90,7 @@ class CountryController {
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void delete(@PathVariable UUID uuid) {
+  void delete(@PathVariable UUID uuid) {
     countryRepository.delete(uuid);
   }
 

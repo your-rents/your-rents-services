@@ -46,7 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ContinentControllerTest {
 
-	static final int NUM_CONTINENTS = 7;
+  static final int NUM_CONTINENTS = 7;
+  static final int NUM_CONTINENTS_TEST = 1;
+  static final int TOT_NUM_CONTINENTS = NUM_CONTINENTS + NUM_CONTINENTS_TEST;
 
 	final static String CONTINENT_URL = "/continents";
 
@@ -76,7 +78,7 @@ class ContinentControllerTest {
 		mvc.perform(get(basePath + CONTINENT_URL).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$", hasSize(NUM_CONTINENTS)))
+        .andExpect(jsonPath("$", hasSize(TOT_NUM_CONTINENTS)))
 				.andExpect(jsonPath("$[0].name", is("Africa")))
 				.andExpect(jsonPath("$[6].name", is("South America")));
 

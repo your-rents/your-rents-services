@@ -36,7 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ContinentRepositoryTest {
 
-	static final int NUM_CONTINENTS = 7;
+  static final int NUM_CONTINENTS = 7;
+  static final int NUM_CONTINENTS_TEST = 1;
+  static final int TOT_NUM_CONTINENTS = NUM_CONTINENTS + NUM_CONTINENTS_TEST;
 
 	@Autowired
 	ContinentRepository continentRepository;
@@ -54,9 +56,9 @@ class ContinentRepositoryTest {
 	void findAll() {
 		List<Continent> list = continentRepository.findAll();
 		assertThat(list).isNotNull();
-		assertThat(list).hasSize(NUM_CONTINENTS);
+    assertThat(list).hasSize(TOT_NUM_CONTINENTS);
 		assertThat(list.get(0).name()).isEqualTo("Africa");
-		assertThat(list.get(NUM_CONTINENTS - 1).name()).isEqualTo("South America");
+    assertThat(list.get(TOT_NUM_CONTINENTS - 1).name()).isEqualTo("ZZZ No Countries continent");
 
 	}
 }

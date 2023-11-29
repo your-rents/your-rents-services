@@ -21,8 +21,12 @@ package com.yourrents.services.geodata.repository;
  */
 
 import static com.yourrents.services.geodata.jooq.Tables.CONTINENT;
+import static com.yourrents.services.geodata.jooq.Tables.COUNTRY;
 import static org.jooq.Records.mapping;
 
+import com.yourrents.services.common.util.exception.DataConflictException;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
+import com.yourrents.services.geodata.jooq.tables.records.ContinentRecord;
 import com.yourrents.services.geodata.model.Continent;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +35,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class ContinentRepository {
@@ -62,13 +67,80 @@ public class ContinentRepository {
 				.map(mapping(Continent::new));
 	}
 
-	private SelectJoinStep<Record3<String, String, UUID>> getSelectContinentSpec() {
-		return dsl.select(
-						CONTINENT.CODE.as("code"),
-						CONTINENT.NAME.as("name"),
-						CONTINENT.EXTERNAL_ID.as("uuid"))
-				.from(CONTINENT);
+  /**
+   * Create a new Continent
+   *
+   * @return the new created continent
+   */
+  @Transactional(readOnly = false)
+  public Continent create(Continent continent) {
+    ContinentRecord newContinent = dsl.newRecord(CONTINENT);
+    newContinent.setCode(continent.code());
+    newContinent.setName(continent.name());
+    newContinent.insert();
+    return findById(newContinent.getId()).orElseThrow();
+  }
 
-	}
+  /**
+   * Delete a continent only if there are no countries associated with it.
+   *
+   * @return true if the continent has been deleted, false otherwise
+   * @throws DataNotFoundException if the continent does not exist
+   * @throws DataConflictException if there is at least one country associated to it
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(UUID uuid) {
+    Integer continentId = dsl.select(CONTINENT.ID)
+        .from(CONTINENT)
+        .where(CONTINENT.EXTERNAL_ID.eq(uuid))
+        .fetchOptional(CONTINENT.ID).orElseThrow(
+            () -> new DataNotFoundException("Continent not found: " + uuid));
+    boolean countriesExist = dsl.fetchExists(COUNTRY, COUNTRY.CONTINENT_ID.eq(continentId));
+    if (countriesExist) {
+      throw new DataConflictException(
+          "Unable to delete the continent with UUID: " + uuid
+              + " because it is referenced by at least one country");
+    }
+    return dsl.deleteFrom(CONTINENT)
+        .where(CONTINENT.ID.eq(continentId))
+        .execute() > 0;
+  }
+
+  private SelectJoinStep<Record3<UUID, String, String>> getSelectContinentSpec() {
+		return dsl.select(
+            CONTINENT.EXTERNAL_ID.as("uuid"),
+						CONTINENT.CODE.as("code"),
+            CONTINENT.NAME.as("name"))
+				.from(CONTINENT);
+  }
+
+  /**
+   * Update a continent.
+   * <p>
+   * You can update the name, the code. You can't update the continent uuid.
+   * <p>
+   * Only not null fields are used to update the continent.
+   *
+   * @param uuid the uuid of the continent to be updated.
+   * @param continent the data of continent to be updated.
+   * @return the updated continent
+   * @throws DataNotFoundException if the continent does not exist
+   */
+  @Transactional(readOnly = false)
+  public Continent update(UUID uuid, Continent continent) {
+    ContinentRecord dbContinent = dsl.selectFrom(CONTINENT)
+        .where(CONTINENT.EXTERNAL_ID.eq(uuid))
+        .fetchOptional().orElseThrow(
+            () -> new DataNotFoundException("Continent not found: " + uuid));
+    if (continent.code() != null) {
+      dbContinent.setCode(continent.code());
+    }
+    if (continent.name() != null) {
+      dbContinent.setName(continent.name());
+    }
+    dbContinent.update();
+    return findById(dbContinent.getId())
+        .orElseThrow(() -> new RuntimeException("failed to update continent: " + uuid));
+  }
 
 }
