@@ -30,7 +30,7 @@ import com.yourrents.services.common.util.exception.DataConflictException;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.Country;
-import com.yourrents.services.geodata.model.Country.Continent;
+import com.yourrents.services.geodata.model.Country.CountryContinent;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ class CountryRepositoryCreateUpdateDeleteTest {
   void createNewCountryInEurope() {
     UUID europeUuid = findEuropeUuid();
     Country newCountry = new Country(null, "ZZ", "New Country FN", "ZZZ",
-        "New Country", 10, new Continent(europeUuid, null));
+        "New Country", 10, new CountryContinent(europeUuid, null));
     Country result = countryRepository.create(newCountry);
     assertThat(result).isNotNull();
     assertThat(result.uuid()).isNotNull();
@@ -62,7 +62,7 @@ class CountryRepositoryCreateUpdateDeleteTest {
     assertThat(result.iso3()).isEqualTo("ZZZ");
     assertThat(result.localName()).isEqualTo("New Country");
     assertThat(result.number()).isEqualTo(10);
-    Continent continent = result.continent();
+    CountryContinent continent = result.continent();
     assertThat(continent).isNotNull();
     assertThat(continent.name()).isEqualTo("Europe");
     assertThat(continent.uuid()).isEqualTo(europeUuid);
@@ -72,7 +72,7 @@ class CountryRepositoryCreateUpdateDeleteTest {
   void createNewCountryWithInvalidContinent() {
     UUID randomUUID = UUID.randomUUID();
     Country newCountry = new Country(null, "ZZ", "New Country FN", "ZZZ",
-        "New Country", 10, new Continent(randomUUID, null));
+        "New Country", 10, new CountryContinent(randomUUID, null));
     assertThatExceptionOfType(DataNotFoundException.class).isThrownBy(() ->
             countryRepository.create(newCountry))
         .withMessageContaining(randomUUID.toString())
@@ -129,7 +129,7 @@ class CountryRepositoryCreateUpdateDeleteTest {
 
     Country newCountry = new Country(null, null, null, null,
         "Updated Country", 10,
-        new Continent(europeUuid, null));
+        new CountryContinent(europeUuid, null));
     //when
     Country result = countryRepository.update(countryInAfrica.uuid(), newCountry);
     //then

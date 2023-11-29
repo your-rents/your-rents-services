@@ -17,6 +17,11 @@
 -- limitations under the License.
 -- #L%
 ---
-
+--test data for province
 INSERT INTO province (id, name, region_id, external_id) VALUES (1000000, 'ZZZ No Cities Province', null, '00000000-0000-0000-0000-000000000001');
+
+--test data for region
 INSERT INTO region (id, name, country_id, external_id) VALUES (1000000, 'ZZZ No Provinces Region', 109, '00000000-0000-0000-0000-000000000001');
+
+--test data for continent
+INSERT INTO continent(id, code, name, external_id) VALUES (1000000, 'ZZ', 'ZZZ No Countries continent', '00000000-0000-0000-0000-000000000001')
