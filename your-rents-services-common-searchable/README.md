@@ -71,18 +71,18 @@ By default the `<field>` part of the parameter is used for the `field` property 
 You can pass and customize these parts passing three separate parameters:
 
 ```properties
-filter.k1.field
-filter.k1.operator
-filter.k1.value
+filter.k.field
+filter.k.operator
+filter.k.value
 ```
 
-where `k1` is a key you can choose. For example:
+where `k` is a key you can freely choose. For example:
 
 So the following CURL request will produce the same result as the previous one:
 
 ```bash
 curl  -X GET \
-  'http://localhost:8080/ex1/people?filter.k1.field=firstName&filter.k1.operator=containsIgnoreCase&filter.k1.value=John' \
+  'http://localhost:8080/ex1/people?filter.k.field=firstName&filter.k.operator=containsIgnoreCase&filter.k.value=John' \
   --header 'Accept: */*'
 ```
 
@@ -93,5 +93,7 @@ If you are using [springdoc-openapi/swagger-ui](https://springdoc.org) you can i
 public List<Person> getPeople(@ParameterObject Searchable searchable) {
 ```
 
-The Swagger UI will show the `Searchable` object as a set of parameters:
+The Swagger UI will show the `Searchable` object as a set of parameters, including the one for the condition combinator (AND or OR):
+
+![Swagger with generated parameters](https://github.com/your-rents/your-rents-services/assets/134066/8e70bf87-7cd5-4d86-94f2-60f2480f862e)
 
