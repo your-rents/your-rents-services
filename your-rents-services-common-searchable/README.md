@@ -295,6 +295,8 @@ public List<Person> getPeople(
 
 Now the Swagger UI will show two sets of parameters for the `Searchable` object:
 
+![Swagger UI with repeated fields](https://github.com/your-rents/your-rents-services/assets/134066/d46b1a3d-7a33-4c50-8547-9f4b34395eb5)
+
 You can also controll it individually for each supported field using the `@SearchableField` annotation. For example:
 
 ```java
