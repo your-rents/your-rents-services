@@ -158,3 +158,30 @@ public class SpringdocConfiguration {
     
 }
 ```
+
+## Customization
+
+You can customize various aspects of the `Searchable` object generation, and the way it is supported in the Swagger UI.
+
+Mostly of the customizations are done by annotating the `Searchable` parameter with the `@SearchableDefault` annotation.
+
+### Explicitly expected fields
+
+You can specify the list of fields you want to support in the `Searchable` object. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(supportedFields = {
+            @SearchableField("firstName"),
+            @SearchableField("lastName"),
+            @SearchableField("uuid") }) Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+In te Swagger UI you will see a set of filter params for each of the specified fields:
+
+
+You can still pass other fields in the query parameters. They will not be ignored.
