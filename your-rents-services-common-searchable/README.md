@@ -36,7 +36,7 @@ Now you can send a GET request to `/ex1/people` with one or more of query parame
 
 ```properties
 filter.<field>.value
-``` 
+```
 
 where `<field>` is the name of a field you want to use for filtering the result. For example:
 
@@ -64,7 +64,7 @@ FilterCriteria [
 
 `FilterCriteria` and `FilterCondition` are the current default implementations of `Searchable` and `SearchCondition` interfaces.
 
-Of course the use of the `Searchable` object for obtaining the desired reesult is in charge of the application logic of your application (in the example above, the `PeopleService` class).
+Of course the use of the `Searchable` object for obtaining the desired result is in charge of the application logic of your application (in the example above, the `PeopleService` class).
 
 By default the `<field>` part of the parameter is used for the `field` property of the `FilterCondition`, the `containsIgnoreCase` operator is used for the `operator` property and the value of the parameter is used for the `value` property.
 
@@ -97,3 +97,64 @@ The Swagger UI will show the `Searchable` object as a set of parameters, includi
 
 ![Swagger with generated parameters](https://github.com/your-rents/your-rents-services/assets/134066/8e70bf87-7cd5-4d86-94f2-60f2480f862e)
 
+Look at [this project](https://github.com/benfante/searchable-example) for a complete example.
+
+## Project configuration
+
+For using `Searchable` you need to add the following dependency to your project:
+
+```xml
+<dependency>
+    <groupId>com.your-rents.services</groupId>
+    <artifactId>your-rents-services-common-searchable</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+Then add the following configuration to your Spring Boot application:
+
+```java
+package com.benfante.examples.searchable;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
+
+@Configuration
+public class SearchableConfiguration {
+    
+    @Bean
+    public SearchableArgumentResolverConfigurer searchableArgumentResolverConfigurer() {
+        return new SearchableArgumentResolverConfigurer();
+    }
+
+}
+```
+
+If you like to use the springdoc-openapi/swagger-ui integration, you can add the following configuration:
+
+```java
+package com.benfante.examples.searchable;
+
+import org.springdoc.core.providers.ObjectMapperProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.yourrents.services.common.searchable.springdoc.SearchableOpenAPIConverter;
+import com.yourrents.services.common.searchable.springdoc.customizer.SearchableOperationCustomizer;
+
+@Configuration
+public class SpringdocConfiguration {
+
+    @Bean
+    SearchableOpenAPIConverter searchableOpenAPIConverter(ObjectMapperProvider objectMapperProvider) {
+        return new SearchableOpenAPIConverter(objectMapperProvider);
+    }
+
+    @Bean
+    SearchableOperationCustomizer searchableOperationCustomizer() {
+        return new SearchableOperationCustomizer();
+    }
+    
+}
+```
