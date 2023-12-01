@@ -2,6 +2,8 @@
 
 This project adds the possibility to use a `Searchable` parameter into a method of a Spring `@Controller` or a `@RestController` class to automatically add a search functionality to the method.
 
+The approach is similar to the one used by [Spring Data Commons](https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.basic.paging-and-sorting) for the `Pageable` and `Sort` parameters, supporting pagination and sorting.
+
 For example:
 
 ```java
@@ -186,3 +188,135 @@ In the Swagger UI you will see a set of filter params for each specified field:
 ![Swagger UI with supported fields](https://github.com/your-rents/your-rents-services/assets/134066/6c6d88a9-7d7a-481a-aaf9-1b938e05dcdf)
 
 You can still pass other fields in the query parameters. They will not be ignored.
+
+### Field value type
+
+By default the value of the field is an object of type `String`. You can specify a different type using the `type` property of the `@SearchableField` annotation. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(supportedFields = {
+            @SearchableField("firstName"),
+            @SearchableField("lastName"),
+            @SearchableField(name = "uuid", type = UUID.class) }) Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+The value of the `uuid` field will be converted to a `UUID` object. Moreover, the default operator for the field will be `eq` (equals).
+
+### Changing the default operator
+
+By default the default operator for a field of type `String` is `containsIgnoreCase`. For all other types the default operator is `eq`.
+
+You can change the default operator for a type using the `defaultOperators` property of the `@SearchableDefault` annotation. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(defaultOperators = {
+            @OperatorDefault(type = String.class, operator = "eq")
+        }) Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+### Passing a different combinator
+
+The business logic of your application will combine the conditions of a `Searchable` using the `combinator` property of the `Searchable` object.
+
+At present it simply returns an enumeration value of the `EnumCombinator` enumeration, which has two values: `AND` and `OR`.
+
+You can choose a combinator value passing the `filter.config.combinator` query parameter. For example:
+
+```bash
+curl  -X GET \
+  'http://localhost:8080/ex1/people?filter.config.combinator=OR&filter.firstName.value=John&filter.lastName.value=Smith' \
+  --header 'Accept: */*'
+```
+
+The reserved `config` key is used for passing configuration parameters, for example the `combinator` parameter.
+
+You can change the name of the reserved key using the `configKey` property of the `@SearchableDefault` annotation. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(configKey = "customConfig") Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+Now you must use the `filter.customConfig.combinator` query parameter for passing the combinator:
+
+```bash
+curl  -X GET \
+  'http://localhost:8080/ex4/people?filter.customConfig.combinator=OR&filter.firstName.value=John&filter.lastName.value=Smith' \
+  --header 'Accept: */*'
+```
+
+### Changing the prefix
+
+By default the prefix for the query parameters is `filter`. You can change it using the `prefix` property of the `@SearchableDefault` annotation. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(prefix = "customFilter") Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+Now you must use query parameters with `customFilter.` prefix. For example:
+
+```bash
+curl  -X GET \
+  'http://localhost:8080/ex5/people?customFilter.firstName.value=John&customFilter.lastName.value=Smith' \
+  --header 'Accept: */*'
+```
+
+### Repeating parameters in Swagger UI
+
+By default the Swagger UI shows only one set of parameters for the `Searchable` object. You can change this behavior using the `@SearchableDefault` annotation with the `repeatingParams` property. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(repeatDefault = 2) Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+Now the Swagger UI will show two sets of parameters for the `Searchable` object:
+
+You can also controll it individually for each supported field using the `@SearchableField` annotation. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(supportedFields = {
+            @SearchableField(name = "firstName", repeat = 2),
+            @SearchableField(name = "lastName", repeat = 3)}) Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
+
+### Hide the Searchable parameter in Swagger UI
+
+By default the Swagger UI shows the `Searchable` parameter in the list of parameters. You can hide it using the `@SearchableDefault` annotation with the `hidden` property. For example:
+
+```java
+@GetMapping
+public List<Person> getPeople(
+        @ParameterObject
+        @SearchableDefault(hidden = true) Searchable searchable) {
+    return peopleService.searchPeople(searchable);
+}
+```
