@@ -20,7 +20,7 @@ import com.yourrents.services.common.searchable.Searchable;
 
 @RestController
 @RequestMapping("/ex1/people")
-public class PeopleControlleEx1 {
+public class PeopleControllerEx1 {
 
     @Autowired
     private PeopleService peopleService;
@@ -76,7 +76,7 @@ filter.k.operator
 filter.k.value
 ```
 
-where `k` is a key you can freely choose. For example:
+where `k` is a key you can freely choose.
 
 So the following CURL request will produce the same result as the previous one:
 
@@ -181,7 +181,8 @@ public List<Person> getPeople(
 }
 ```
 
-In te Swagger UI you will see a set of filter params for each of the specified fields:
+In the Swagger UI you will see a set of filter params for each specified field:
 
+![Swagger UI with supported fields](https://github.com/your-rents/your-rents-services/assets/134066/6c6d88a9-7d7a-481a-aaf9-1b938e05dcdf)
 
 You can still pass other fields in the query parameters. They will not be ignored.
