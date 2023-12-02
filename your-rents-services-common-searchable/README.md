@@ -333,7 +333,7 @@ Feel free to open a pull request to add your project to the list.
 
 ### JOOQ: Your Rents Services Common Util
 
-[Your Rents Services Common Util](https://github.com/your-rents/your-rents-services/tree/main/your-rents-services-common-util) is a set of utilities used for developping the Your Rents application.for Spring Boot applications. It's the same repository where this project is hosted.
+[Your Rents Services Common Util](https://github.com/your-rents/your-rents-services/tree/main/your-rents-services-common-util) is a set of utilities used for developping the Your Rents application and its services. It's in the same repository where this project is hosted.
 
 It provides the `JooqUtils` class, which contains the `paginate` and `getQueryWithConditionsAndSorts` methods that can be used to build a filtered and paginated [JOOQ](https://www.jooq.org) query using `Searchable` and `Pageable` objects.
 
