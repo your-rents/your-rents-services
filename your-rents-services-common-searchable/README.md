@@ -322,3 +322,37 @@ public List<Person> getPeople(
     return peopleService.searchPeople(searchable);
 }
 ```
+
+## Business logic implementations
+
+This projects does not provide any implementation of the business logic using the `Searchable` object. You can use the `Searchable` object in your business logic in any way you like.
+
+Here we well link to any project that provides a business logic implementation using the `Searchable` object.
+
+Feel free to open a pull request to add your project to the list.
+
+### JOOQ: Your Rents Services Common Util
+
+[Your Rents Services Common Util](https://github.com/your-rents/your-rents-services/tree/main/your-rents-services-common-util) is a set of utilities used for developping the Your Rents application.for Spring Boot applications. It's the same repository where this project is hosted.
+
+It provides the `JooqUtils` class, which contains the `paginate` and `getQueryWithConditionsAndSorts` methods that can be used to build a filtered and paginated [JOOQ](https://www.jooq.org) query using `Searchable` and `Pageable` objects.
+
+You can use it adding the following dependency to your project:
+
+```xml
+<dependency>
+    <groupId>com.your-rents.services</groupId>
+    <artifactId>your-rents-services-common-util</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+You can see some examples of its usage in the [YourRents Geodata Service](your-rents-services-geodata).
+
+For example:
+
+<https://github.com/your-rents/your-rents-services/blob/b187af33cdf6c40aa0cb3bdb4ec3e777005ad9b5/your-rents-services-geodata/src/main/java/com/yourrents/services/geodata/repository/CityRepository.java#L63-L80>
+
+### Spring Data JPA
+
+TBD
