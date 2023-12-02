@@ -347,7 +347,7 @@ You can use it adding the following dependency to your project:
 </dependency>
 ```
 
-You can see some examples of its usage in the [YourRents Geodata Service](your-rents-services-geodata).
+You can see some examples of its usage in the [YourRents Geodata Service](https://github.com/your-rents/your-rents-services/tree/42-searchable-documentation/your-rents-services-geodata).
 
 For example:
 
