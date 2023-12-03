@@ -28,6 +28,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.method.HandlerMethod;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.searchable.annotation.OperatorDefault;
 import com.yourrents.services.common.searchable.annotation.SearchableDefault;
 import com.yourrents.services.common.searchable.annotation.SearchableField;
 
@@ -57,15 +58,18 @@ public class SearchableOperationCustomizer implements OperationCustomizer {
                     int repeat = getRepeat(searchableDefault, searchableField);
                     for (int i = 1; i <= repeat; i++) {
                         addFilterParameters(operation, filterPrefix, getKey(searchableField.name(), i, repeat),
-                                getDefaulOperator(searchableField), searchableField.name());
+                                getDefaulOperator(searchableDefault.defaultOperators(), searchableField),
+                                searchableField.name());
                     }
                 });
             }
-            if (searchableDefault != null && searchableDefault.supportedFields().length == 0) {
+            if (searchableDefault == null || searchableDefault.supportedFields().length == 0) {
                 int repeat = getRepeat(searchableDefault);
                 for (int i = 1; i <= repeat; i++) {
                     addFilterParameters(operation, filterPrefix, getKey(i, repeat),
-                            getDefaulOperator(null), null);
+                            getDefaulOperator(searchableDefault != null ? searchableDefault.defaultOperators() : null,
+                                    null),
+                            null);
                 }
             }
         });
@@ -92,7 +96,7 @@ public class SearchableOperationCustomizer implements OperationCustomizer {
         operation.addParametersItem(new Parameter().in("query")
                 .name(prefix + SearchableDefault.DEFAULT_SEPARATOR + key + SearchableDefault.DEFAULT_SEPARATOR
                         + "operator")
-                .description("The comparison operator for the filter (the default is containsIgnoreCase)")
+                .description("The comparison operator for the filter")
                 .required(false)
                 .schema(operatorSchema));
         operation.addParametersItem(new Parameter().in("query")
@@ -113,7 +117,16 @@ public class SearchableOperationCustomizer implements OperationCustomizer {
                 : SearchableDefault.DEFAULT_REPEAT;
     }
 
-    private String getDefaulOperator(SearchableField searchableField) {
+    String getDefaulOperator(OperatorDefault[] operatorDefaults, SearchableField searchableField) {
+        if (operatorDefaults != null) {
+            Optional<String> operator = Arrays.stream(operatorDefaults)
+                    .filter(operatorDefault -> operatorDefault.type().isAssignableFrom(
+                            searchableField != null ? searchableField.type() : String.class))
+                    .map(operatorDefault -> operatorDefault.operator()).findFirst();
+            if (operator.isPresent()) {
+                return operator.get();
+            }
+        }
         if (searchableField != null) {
             return searchableField.type() == String.class ? SearchableDefault.DEFAULT_STRING_OPERATOR
                     : SearchableDefault.DEFAULT_OPERATOR;
