@@ -75,3 +75,18 @@ CREATE TABLE yrs_geodata.region_local_data (
     id integer,
     it_codice_istat character varying(2)
 );
+
+CREATE TABLE yrs_geodata.address
+(
+  id             SERIAL,
+  address_line_1 TEXT NOT NULL,
+  address_line_2 TEXT,
+  postal_code    character varying(20),
+  city_external_id         UUID,
+  city           character varying(256),
+  province_external_id   UUID,
+  province       character varying(256),
+  country_external_id   UUID,
+  country        character varying(256),
+  external_id    UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
