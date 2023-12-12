@@ -45,9 +45,14 @@ ALTER TABLE ONLY yrs_geodata.region
 ALTER TABLE ONLY yrs_geodata.region_local_data
     ADD CONSTRAINT region_local_data_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY yrs_geodata.address
+  ADD CONSTRAINT address_pkey PRIMARY KEY (id);
+
+-- unique constraints
 ALTER TABLE ONLY yrs_geodata.continent
     ADD CONSTRAINT uk_continent_name UNIQUE (name);
 
+-- fk constraints
 ALTER TABLE ONLY yrs_geodata.city
     ADD CONSTRAINT fk_city_province FOREIGN KEY (province_id) REFERENCES yrs_geodata.province(id);
 
