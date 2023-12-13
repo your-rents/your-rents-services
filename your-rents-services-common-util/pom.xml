@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.your-rents.services</groupId>
         <artifactId>your-rents-services-parent</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.3</version>
     </parent>
     <artifactId>your-rents-services-common-util</artifactId>
 	<name>YourRents Service Common Util</name>
