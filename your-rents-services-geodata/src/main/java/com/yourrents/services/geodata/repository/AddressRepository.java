@@ -33,9 +33,6 @@ import com.yourrents.services.geodata.model.Address;
 import com.yourrents.services.geodata.model.Address.AddressCity;
 import com.yourrents.services.geodata.model.Address.AddressCountry;
 import com.yourrents.services.geodata.model.Address.AddressProvince;
-import com.yourrents.services.geodata.model.City;
-import com.yourrents.services.geodata.model.Country;
-import com.yourrents.services.geodata.model.Province;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -58,20 +55,16 @@ public class AddressRepository {
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
   private final AddressMapper addressMapper;
-  private final CityRepository cityRepository;
-  private final ProvinceRepository provinceRepository;
-  private final CountryRepository countryRepository;
+  private final AddressValueSetter addressValueSetter;
 
   public AddressRepository(DSLContext dsl, JooqUtils jooqUtils, AddressMapper addressMapper,
-      CityRepository cityRepository, ProvinceRepository provinceRepository,
-      CountryRepository countryRepository) {
+      AddressValueSetter addressValueSetter) {
     this.dsl = dsl;
     this.jooqUtils = jooqUtils;
     this.addressMapper = addressMapper;
-    this.cityRepository = cityRepository;
-    this.provinceRepository = provinceRepository;
-    this.countryRepository = countryRepository;
+    this.addressValueSetter = addressValueSetter;
   }
+
 
   public Page<Address> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
@@ -110,45 +103,39 @@ public class AddressRepository {
   @Transactional(readOnly = false)
   public Address create(Address address) {
     AddressRecord newAddress = dsl.newRecord(ADDRESS);
-    newAddress.setAddressLine_1(address.addressLine1());
-    newAddress.setAddressLine_2(address.addressLine2());
-    newAddress.setPostalCode(address.postalCode());
-    if (address.city() != null) {
-      if (address.city().uuid() != null) {
-        City city = cityRepository.findByExternalId(address.city().uuid()).orElseThrow(
-            () -> new DataNotFoundException("City not found: "
-                + address.city().uuid()));
-        newAddress.setCityExternalId(city.uuid());
-        newAddress.setCity(city.name());
-      } else {
-        newAddress.setCity(address.city().name());
-      }
-    }
-    if (address.province() != null) {
-      if (address.province().uuid() != null) {
-        Province province = provinceRepository.findByExternalId(address.province().uuid())
-            .orElseThrow(
-                () -> new DataNotFoundException("Province not found: "
-                    + address.province().uuid()));
-        newAddress.setProvinceExternalId(province.uuid());
-        newAddress.setProvince(province.name());
-      } else {
-        newAddress.setProvince(address.province().name());
-      }
-    }
-    if (address.country() != null) {
-      if (address.country().uuid() != null) {
-        Country country = countryRepository.findByExternalId(address.country().uuid()).orElseThrow(
-            () -> new DataNotFoundException("Country not found: "
-                + address.country().uuid()));
-        newAddress.setCountryExternalId(country.uuid());
-        newAddress.setCountry(country.localName());
-      } else {
-        newAddress.setCountry(address.country().localName());
-      }
-    }
+    addressValueSetter.updateAddressRecord(newAddress, address);
     newAddress.insert();
     return findById(newAddress.getId()).orElseThrow();
+  }
+
+  /**
+   * Delete an address
+   *
+   * @return true if the address has been deleted, false otherwise
+   * @throws DataNotFoundException if the address does not exist
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(UUID uuid) {
+    Integer addressId = dsl.select(ADDRESS.ID)
+        .from(ADDRESS)
+        .where(ADDRESS.EXTERNAL_ID.eq(uuid))
+        .fetchOptional(ADDRESS.ID).orElseThrow(
+            () -> new DataNotFoundException("Address not found: " + uuid));
+    return dsl.deleteFrom(ADDRESS)
+        .where(ADDRESS.ID.eq(addressId))
+        .execute() > 0;
+  }
+
+  @Transactional(readOnly = false)
+  public Address update(UUID uuid, Address address) {
+    AddressRecord dbAddress = dsl.selectFrom(ADDRESS)
+        .where(ADDRESS.EXTERNAL_ID.eq(uuid))
+        .fetchOptional().orElseThrow(
+            () -> new DataNotFoundException("Record not found: " + uuid));
+    addressValueSetter.updateAddressRecord(dbAddress, address);
+    dbAddress.update();
+    return findById(dbAddress.getId())
+        .orElseThrow(() -> new RuntimeException("failed to update address: " + uuid));
   }
 
   private SelectJoinStep<Record7<UUID, String, String, String, AddressCity, AddressProvince, AddressCountry>> getSelectAddressSpec() {
