@@ -113,7 +113,7 @@ class AddressControllerTest {
         .andExpect(jsonPath("$.city.uuid").isEmpty())
         .andExpect(jsonPath("$.province.name", is("Milano")))
         .andExpect(jsonPath("$.province.uuid").isNotEmpty())
-        .andExpect(jsonPath("$.country.localName", is("Italy")))
+        .andExpect(jsonPath("$.country.name", is("Italy")))
         .andExpect(jsonPath("$.country.uuid").isNotEmpty());
   }
 

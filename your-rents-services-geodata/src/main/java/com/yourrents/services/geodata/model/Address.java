@@ -22,19 +22,6 @@ package com.yourrents.services.geodata.model;
 
 import java.util.UUID;
 
-public record Address(UUID uuid, String addressLine1, String addressLine2, String postalCode,
-                      AddressCity city, AddressProvince province, AddressCountry country) {
-
-  public record AddressCity(UUID uuid, String name) {
-
-  }
-
-  public record AddressProvince(UUID uuid, String name) {
-
-  }
-
-  public record AddressCountry(UUID uuid, String localName) {
-
-  }
-
+public record Address(UUID uuid, String addressLine1, String addressLine2, String postalCode, GeoReference city,
+    GeoReference province, GeoReference country) {
 }

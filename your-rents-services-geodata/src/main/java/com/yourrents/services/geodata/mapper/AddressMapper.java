@@ -21,9 +21,8 @@ package com.yourrents.services.geodata.mapper;
  */
 
 import com.yourrents.services.geodata.model.Address;
-import com.yourrents.services.geodata.model.Address.AddressCity;
-import com.yourrents.services.geodata.model.Address.AddressCountry;
-import com.yourrents.services.geodata.model.Address.AddressProvince;
+import com.yourrents.services.geodata.model.GeoReference;
+
 import java.util.UUID;
 import org.jooq.Record;
 import org.springframework.stereotype.Component;
@@ -38,8 +37,8 @@ public class AddressMapper {
         record.get("addressLine1", String.class),
         record.get("addressLine2", String.class),
         record.get("postalCode", String.class),
-        record.get("city", AddressCity.class),
-        record.get("province", AddressProvince.class),
-        record.get("country", AddressCountry.class));
+        record.get("city", GeoReference.class),
+        record.get("province", GeoReference.class),
+        record.get("country", GeoReference.class));
   }
 }

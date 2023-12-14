@@ -64,7 +64,7 @@ class AddressRepositoryTest {
         UUID.fromString("00000000-0000-0000-0000-000000000001")).orElseThrow();
     assertThat(address, notNullValue());
     assertThat(address.city().name(), equalTo("Paddington"));
-    assertThat(address.country().localName(), equalTo("United Kingdom"));
+    assertThat(address.country().name(), equalTo("United Kingdom"));
   }
 
   @Test

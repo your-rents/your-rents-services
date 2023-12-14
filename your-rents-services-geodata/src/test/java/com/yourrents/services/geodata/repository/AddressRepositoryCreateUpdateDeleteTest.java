@@ -26,11 +26,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.Address;
-import com.yourrents.services.geodata.model.Address.AddressCity;
-import com.yourrents.services.geodata.model.Address.AddressCountry;
-import com.yourrents.services.geodata.model.Address.AddressProvince;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.Country;
+import com.yourrents.services.geodata.model.GeoReference;
+
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -57,9 +56,9 @@ class AddressRepositoryCreateUpdateDeleteTest {
     City city = cityRepository.findById(1).orElseThrow();
     Country country = countryRepository.findById(1).orElseThrow();
     Address newAddress = new Address(null, "via roma 10", "first floor", "30038",
-        new AddressCity(city.uuid(), null),
-        new AddressProvince(city.province().uuid(), null),
-        new AddressCountry(country.uuid(), null)
+        new GeoReference(city.uuid(), null),
+        new GeoReference(city.province().uuid(), null),
+        new GeoReference(country.uuid(), null)
     );
     //when
     Address result = addressRepository.create(newAddress);
@@ -74,16 +73,16 @@ class AddressRepositoryCreateUpdateDeleteTest {
     assertThat(result.province().uuid()).isEqualTo(city.province().uuid());
     assertThat(result.province().name()).isEqualTo(city.province().name());
     assertThat(result.country().uuid()).isEqualTo(country.uuid());
-    assertThat(result.country().localName()).isEqualTo(country.localName());
+    assertThat(result.country().name()).isEqualTo(country.localName());
   }
 
   @Test
   void crateNewAddressWithNoLinkedDetails() {
     //given
     Address newAddress = new Address(null, "via roma 10", "first floor", "30038",
-        new AddressCity(null, "Cloud City"),
-        new AddressProvince(null, "Eldermoor Enclave"),
-        new AddressCountry(null, "Astraloria")
+        new GeoReference(null, "Cloud City"),
+        new GeoReference(null, "Eldermoor Enclave"),
+        new GeoReference(null, "Astraloria")
     );
     //when
     Address result = addressRepository.create(newAddress);
@@ -98,7 +97,7 @@ class AddressRepositoryCreateUpdateDeleteTest {
     assertThat(result.province().uuid()).isNull();
     assertThat(result.province().name()).isEqualTo("Eldermoor Enclave");
     assertThat(result.country().uuid()).isNull();
-    assertThat(result.country().localName()).isEqualTo("Astraloria");
+    assertThat(result.country().name()).isEqualTo("Astraloria");
   }
 
   @Test
@@ -108,9 +107,9 @@ class AddressRepositoryCreateUpdateDeleteTest {
     UUID randomUUID = UUID.randomUUID();
     Country country = countryRepository.findById(1).orElseThrow();
     Address newAddress = new Address(null, "via roma 10", "first floor", "30038",
-        new AddressCity(city.uuid(), null),
-        new AddressProvince(randomUUID, null),
-        new AddressCountry(country.uuid(), null)
+        new GeoReference(city.uuid(), null),
+        new GeoReference(randomUUID, null),
+        new GeoReference(country.uuid(), null)
     );
     //when-then
     assertThatExceptionOfType(DataNotFoundException.class).isThrownBy(() ->
@@ -146,8 +145,8 @@ class AddressRepositoryCreateUpdateDeleteTest {
     Address oldAddress = addressRepository.findById(1000000000).orElseThrow();
     City city = cityRepository.findById(1).orElseThrow();
     Address updateAddress = new Address(null, "via roma 10", null, null,
-        new AddressCity(city.uuid(), null),
-        new AddressProvince(city.province().uuid(), null),
+        new GeoReference(city.uuid(), null),
+        new GeoReference(city.province().uuid(), null),
         null
     );
     //when
@@ -163,7 +162,7 @@ class AddressRepositoryCreateUpdateDeleteTest {
     assertThat(result.province().uuid()).isEqualTo(city.province().uuid());
     assertThat(result.province().name()).isEqualTo(city.province().name());
     assertThat(result.country().uuid()).isEqualTo(oldAddress.country().uuid());
-    assertThat(result.country().localName()).isEqualTo(oldAddress.country().localName());
+    assertThat(result.country().name()).isEqualTo(oldAddress.country().name());
   }
 
 }

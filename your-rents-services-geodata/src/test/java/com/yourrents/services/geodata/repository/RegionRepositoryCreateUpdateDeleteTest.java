@@ -29,8 +29,8 @@ import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataConflictException;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
+import com.yourrents.services.geodata.model.GeoReference;
 import com.yourrents.services.geodata.model.Region;
-import com.yourrents.services.geodata.model.Region.RegionCountry;
 import com.yourrents.services.geodata.model.RegionLocalData;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,13 +58,13 @@ class RegionRepositoryCreateUpdateDeleteTest {
 		UUID italyUuid = findItalyUuid();
 		Region newRegion = new Region(null, "New Region",
 				new RegionLocalData("NR"),
-				new RegionCountry(italyUuid, null));
+				new GeoReference(italyUuid, null));
 
 		Region result = regionRepository.create(newRegion);
 
 		assertThat(result).isNotNull();
 		assertThat(result.name()).isEqualTo("New Region");
-		assertThat(result.country().localName()).isEqualTo("Italy");
+		assertThat(result.country().name()).isEqualTo("Italy");
 		assertThat(result.country().uuid()).isEqualTo(italyUuid);
 
 		RegionLocalData regionLocalData = result.localData();
@@ -77,7 +77,7 @@ class RegionRepositoryCreateUpdateDeleteTest {
     UUID randomUUID = UUID.randomUUID();
     Region newRegion = new Region(null, "New Region",
         null,
-        new RegionCountry(randomUUID, null));
+        new GeoReference(randomUUID, null));
     assertThatExceptionOfType(DataNotFoundException.class).isThrownBy(() ->
             regionRepository.create(newRegion))
         .withMessageContaining(randomUUID.toString())
@@ -142,13 +142,13 @@ class RegionRepositoryCreateUpdateDeleteTest {
 
     Region updateRegion = new Region(null, "Update Region",
         new RegionLocalData("11"),
-        new RegionCountry(countryId, null));
+        new GeoReference(countryId, null));
     //when
     Region result = regionRepository.update(region.uuid(), updateRegion);
     //then
     assertThat(result).isNotNull();
     assertThat(result.name()).isEqualTo("Update Region");
-    assertThat(result.country().localName()).isEqualTo("Andorra");
+    assertThat(result.country().name()).isEqualTo("Andorra");
     assertThat(result.country().uuid()).isEqualTo(countryId);
     RegionLocalData regionLocalData = result.localData();
     assertThat(regionLocalData).isNotNull();

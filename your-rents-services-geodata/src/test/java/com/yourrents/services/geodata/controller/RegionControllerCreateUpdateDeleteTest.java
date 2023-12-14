@@ -97,7 +97,7 @@ class RegionControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.localData.itCodiceIstat", is("11")))
         .andExpect(jsonPath("$.country").exists())
         .andExpect(jsonPath("$.country.uuid", is(countryUuid.toString())))
-        .andExpect(jsonPath("$.country.localName", is("Italy")));
+        .andExpect(jsonPath("$.country.name", is("Italy")));
   }
 
   @Test
@@ -141,7 +141,7 @@ class RegionControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.localData.itCodiceIstat", is("11")))
         .andExpect(jsonPath("$.country").exists())
         .andExpect(jsonPath("$.country.uuid", is(countryUuid.toString())))
-        .andExpect(jsonPath("$.country.localName", is("Andorra")));
+        .andExpect(jsonPath("$.country.name", is("Andorra")));
   }
 
 }

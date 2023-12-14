@@ -22,10 +22,5 @@ package com.yourrents.services.geodata.model;
 
 import java.util.UUID;
 
-public record Region(UUID uuid, String name, RegionLocalData localData,
-					 RegionCountry country) {
-
-	public record RegionCountry(UUID uuid, String localName) {
-	}
-
+public record Region(UUID uuid, String name, RegionLocalData localData, GeoReference country) {
 }

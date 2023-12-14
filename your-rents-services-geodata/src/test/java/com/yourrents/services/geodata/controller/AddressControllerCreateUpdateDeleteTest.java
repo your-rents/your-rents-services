@@ -77,7 +77,7 @@ class AddressControllerCreateUpdateDeleteTest {
                       "name": "Oakville"
                    },
                    "country": {
-                     "localName": "Canada"
+                     "name": "Canada"
                    }
                  }
                 """))
@@ -89,7 +89,7 @@ class AddressControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.city.name", is("Oakville")))
         .andExpect(jsonPath("$.city.uuid").isEmpty())
         .andExpect(jsonPath("$.province").isEmpty())
-        .andExpect(jsonPath("$.country.localName", is("Canada")));
+        .andExpect(jsonPath("$.country.name", is("Canada")));
   }
 
   @Test
@@ -109,7 +109,7 @@ class AddressControllerCreateUpdateDeleteTest {
                       "uuid": "%s"
                    },
                    "country": {
-                     "localName": "Themyscira"
+                     "name": "Themyscira"
                    }
                  }
                 """.formatted(city.uuid(), city.province().uuid())))
@@ -117,7 +117,7 @@ class AddressControllerCreateUpdateDeleteTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.city.name", is("Abano Terme")))
         .andExpect(jsonPath("$.province.name", is("Padova")))
-        .andExpect(jsonPath("$.country.localName", is("Themyscira")));
+        .andExpect(jsonPath("$.country.name", is("Themyscira")));
   }
 
   @Test
@@ -138,7 +138,7 @@ class AddressControllerCreateUpdateDeleteTest {
                       "uuid": "%s"
                    },
                    "country": {
-                     "localName": "Themyscira"
+                     "name": "Themyscira"
                    }
                  }
                 """.formatted(city.uuid(), randomUUID)))
@@ -178,7 +178,7 @@ class AddressControllerCreateUpdateDeleteTest {
                 {
                    "addressLine1": "New Address",
                    "country": {
-                     "localName": "New Country"
+                     "name": "New Country"
                    }
                 }
                 """))
@@ -191,7 +191,7 @@ class AddressControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.city.uuid", is(oldAddress.city().uuid())))
         .andExpect(jsonPath("$.province.name", is(oldAddress.province().name())))
         .andExpect(jsonPath("$.province.uuid", is(oldAddress.province().uuid())))
-        .andExpect(jsonPath("$.country.localName", is("New Country")))
+        .andExpect(jsonPath("$.country.name", is("New Country")))
         .andExpect(jsonPath("$.country.uuid").isEmpty());
   }
 

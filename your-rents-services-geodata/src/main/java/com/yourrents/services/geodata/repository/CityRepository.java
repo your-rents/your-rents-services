@@ -48,6 +48,7 @@ import com.yourrents.services.geodata.jooq.tables.records.CityLocalDataRecord;
 import com.yourrents.services.geodata.jooq.tables.records.CityRecord;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
+import com.yourrents.services.geodata.model.GeoReference;
 
 @Repository
 @Transactional(readOnly = true)
@@ -72,7 +73,7 @@ public class CityRepository {
                                         r.get("uuid", UUID.class),
                                         r.get("name", String.class),
                                         r.get("localData", CityLocalData.class),
-                                        r.get("province", City.Province.class));
+                                        r.get("province", GeoReference.class));
                 });
                 int totalRows = Objects.requireNonNullElse(
                                 result.fetchAny("total_rows", Integer.class), 0);
@@ -187,13 +188,13 @@ public class CityRepository {
                 return findById(dbCity.getId()).orElseThrow();
         }
 
-        private SelectOnConditionStep<Record4<UUID, String, CityLocalData, City.Province>> getSelectCitySpec() {
+        private SelectOnConditionStep<Record4<UUID, String, CityLocalData, GeoReference>> getSelectCitySpec() {
                 return dsl.select(
                                 CITY.EXTERNAL_ID.as("uuid"), CITY.NAME.as("name"),
                                 row(CITY_LOCAL_DATA.IT_CODICE_ISTAT, CITY_LOCAL_DATA.IT_CODICE_ERARIALE)
                                                 .mapping(nullOnAllNull(CityLocalData::new)).as("localData"),
                                 row(CITY.province().EXTERNAL_ID, CITY.province().NAME)
-                                                .mapping(nullOnAllNull(City.Province::new)).as("province"))
+                                                .mapping(nullOnAllNull(GeoReference::new)).as("province"))
                                 .from(CITY).leftJoin(CITY_LOCAL_DATA).on(CITY.ID.eq(CITY_LOCAL_DATA.ID));
         }
 

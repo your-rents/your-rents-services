@@ -30,11 +30,9 @@ import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.jooq.tables.records.AddressRecord;
 import com.yourrents.services.geodata.mapper.AddressMapper;
 import com.yourrents.services.geodata.model.Address;
-import com.yourrents.services.geodata.model.Address.AddressCity;
-import com.yourrents.services.geodata.model.Address.AddressCountry;
-import com.yourrents.services.geodata.model.Address.AddressProvince;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.Country;
+import com.yourrents.services.geodata.model.GeoReference;
 import com.yourrents.services.geodata.model.Province;
 import java.util.List;
 import java.util.Objects;
@@ -194,24 +192,24 @@ public class AddressRepository {
         addressRecord.setCountryExternalId(country.uuid());
         addressRecord.setCountry(country.localName());
       } else {
-        addressRecord.setCountry(address.country().localName());
+        addressRecord.setCountry(address.country().name());
         addressRecord.setCountryExternalId(null);
       }
     }
   }
 
-  private SelectJoinStep<Record7<UUID, String, String, String, AddressCity, AddressProvince, AddressCountry>> getSelectAddressSpec() {
+  private SelectJoinStep<Record7<UUID, String, String, String, GeoReference, GeoReference, GeoReference>> getSelectAddressSpec() {
     return dsl.select(
             ADDRESS.EXTERNAL_ID.as("uuid"),
             ADDRESS.ADDRESS_LINE_1.as("addressLine1"),
             ADDRESS.ADDRESS_LINE_2.as("addressLine2"),
             ADDRESS.POSTAL_CODE.as("postalCode"),
             row(ADDRESS.CITY_EXTERNAL_ID, ADDRESS.CITY)
-                .mapping(nullOnAllNull(AddressCity::new)).as("city"),
+                .mapping(nullOnAllNull(GeoReference::new)).as("city"),
             row(ADDRESS.PROVINCE_EXTERNAL_ID, ADDRESS.PROVINCE)
-                .mapping(nullOnAllNull(Address.AddressProvince::new)).as("province"),
+                .mapping(nullOnAllNull(GeoReference::new)).as("province"),
             row(ADDRESS.COUNTRY_EXTERNAL_ID, ADDRESS.COUNTRY)
-                .mapping(nullOnAllNull(Address.AddressCountry::new)).as("country"))
+                .mapping(nullOnAllNull(GeoReference::new)).as("country"))
         .from(ADDRESS);
   }
 

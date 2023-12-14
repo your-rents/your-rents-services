@@ -34,6 +34,7 @@ import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.jooq.tables.records.ProvinceLocalDataRecord;
 import com.yourrents.services.geodata.jooq.tables.records.ProvinceRecord;
+import com.yourrents.services.geodata.model.GeoReference;
 import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.model.ProvinceLocalData;
 import java.util.List;
@@ -74,7 +75,7 @@ public class ProvinceRepository {
 						r.get("uuid", UUID.class),
 						r.get("name", String.class),
 						r.get("localData", ProvinceLocalData.class),
-						r.get("region", Province.Region.class))
+						r.get("region", GeoReference.class))
 		);
 		int totalRows = Objects.requireNonNullElse(
 				result.fetchAny("total_rows", Integer.class), 0);
@@ -199,14 +200,14 @@ public class ProvinceRepository {
 	}
 
 
-	private SelectOnConditionStep<Record4<UUID, String, ProvinceLocalData, Province.Region>> getSelectProvinceSpec() {
+	private SelectOnConditionStep<Record4<UUID, String, ProvinceLocalData, GeoReference>> getSelectProvinceSpec() {
 		return dsl.select(
 						PROVINCE.EXTERNAL_ID.as("uuid"),
 						PROVINCE.NAME.as("name"),
 						row(PROVINCE_LOCAL_DATA.IT_CODICE_ISTAT, PROVINCE_LOCAL_DATA.IT_SIGLA)
 								.mapping(nullOnAllNull(ProvinceLocalData::new)).as("localData"),
 						row(REGION.EXTERNAL_ID, REGION.NAME)
-								.mapping(nullOnAllNull(Province.Region::new)).as("region"))
+								.mapping(nullOnAllNull(GeoReference::new)).as("region"))
 				.from(PROVINCE)
 				.leftJoin(PROVINCE_LOCAL_DATA).on(PROVINCE.ID.eq(PROVINCE_LOCAL_DATA.ID))
 				.leftJoin(REGION).on(PROVINCE.REGION_ID.eq(REGION.ID));

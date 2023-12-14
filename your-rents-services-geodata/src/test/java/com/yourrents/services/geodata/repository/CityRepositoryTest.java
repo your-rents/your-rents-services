@@ -48,6 +48,7 @@ import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.model.CityLocalData;
+import com.yourrents.services.geodata.model.GeoReference;
 
 @SpringBootTest
 @Import(TestYourRentsGeoDataServiceApplication.class)
@@ -196,7 +197,7 @@ class CityRepositoryTest {
         UUID veronaUuid = cityInVeronaProvince.getContent().get(0).province().uuid();
 
         City newCity = new City(null, "New City", new CityLocalData("123456", "1234"),
-                new City.Province(veronaUuid, "Not Important"));
+                new GeoReference(veronaUuid, "Not Important"));
         City result = cityRepository.create(newCity);
         assertThat(result, notNullValue());
         assertThat(result.uuid(), notNullValue());
@@ -221,7 +222,7 @@ class CityRepositoryTest {
     @Test
     void testCreateNewCityWithNotExistingProvince() {
         UUID randomUUID = UUID.randomUUID();
-        City newCity = new City(null, "New City", null, new City.Province(randomUUID, null));
+        City newCity = new City(null, "New City", null, new GeoReference(randomUUID, null));
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> cityRepository.create(newCity));
         assertThat(ex.getMessage(), equalTo("Province not found: " + randomUUID));
@@ -251,7 +252,7 @@ class CityRepositoryTest {
                 .where(PROVINCE.ID.eq(23)) // 23 is the id of the province of Verona
                 .fetchAny(PROVINCE.EXTERNAL_ID);
         City updatedCity = new City(null, "Updated City", new CityLocalData("123456", "1234"),
-                new City.Province(newProvinceUuid, null));
+                new GeoReference(newProvinceUuid, null));
         City result = cityRepository.update(city.uuid(), updatedCity);
         assertThat(result, notNullValue());
         assertThat(result.uuid(), equalTo(city.uuid()));
@@ -278,7 +279,7 @@ class CityRepositoryTest {
     void testUpdateACityWithANotExistingProvince() {
         City city = cityRepository.findById(1).get();
         UUID randomUUID = UUID.randomUUID();
-        City updatedCity = new City(null, "Updated City", null, new City.Province(randomUUID, null));
+        City updatedCity = new City(null, "Updated City", null, new GeoReference(randomUUID, null));
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> cityRepository.update(city.uuid(), updatedCity));
         assertThat(ex.getMessage(), equalTo("Province not found: " + randomUUID));

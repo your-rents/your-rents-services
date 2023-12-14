@@ -33,7 +33,8 @@ import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import com.yourrents.services.geodata.jooq.tables.records.CountryRecord;
 import com.yourrents.services.geodata.model.Country;
-import com.yourrents.services.geodata.model.Country.CountryContinent;
+import com.yourrents.services.geodata.model.GeoReference;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public class CountryRepository {
 						r.get("iso3", String.class),
 						r.get("localName", String.class),
 						r.get("number", Integer.class),
-            r.get("continent", CountryContinent.class))
+            r.get("continent", GeoReference.class))
 		);
 		int totalRows = Objects.requireNonNullElse(
 				result.fetchAny("total_rows", Integer.class), 0);
@@ -197,7 +198,7 @@ public class CountryRepository {
         .orElseThrow(() -> new RuntimeException("failed to update country: " + uuid));
   }
 
-  private SelectOnConditionStep<Record7<UUID, String, String, String, String, Integer, CountryContinent>> getSelectCountrySpec() {
+  private SelectOnConditionStep<Record7<UUID, String, String, String, String, Integer, GeoReference>> getSelectCountrySpec() {
 		return dsl.select(
 						COUNTRY.EXTERNAL_ID.as("uuid"),
 						COUNTRY.ISO_CODE.as("isoCode"),
@@ -206,7 +207,7 @@ public class CountryRepository {
 						COUNTRY.LOCAL_NAME.as("localName"),
 						COUNTRY.NUMBER.as("number"),
 						row(CONTINENT.EXTERNAL_ID, CONTINENT.NAME)
-                .mapping(nullOnAllNull(CountryContinent::new)).as("continent"))
+                .mapping(nullOnAllNull(GeoReference::new)).as("continent"))
 				.from(COUNTRY).leftJoin(CONTINENT)
 				.on(COUNTRY.CONTINENT_ID.eq(CONTINENT.ID));
 	}

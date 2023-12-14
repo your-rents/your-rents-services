@@ -67,9 +67,9 @@ class RegionRepositoryTest {
 		Page<Region> page = regionRepository.find(FilterCriteria.of(), pageable);
 		assertThat(page, iterableWithSize(PAGE_SIZE));
 		assertThat(page.getContent().get(0).name(), equalTo("Abruzzo"));
-		assertThat(page.getContent().get(0).country().localName(), equalTo("Italy"));
+		assertThat(page.getContent().get(0).country().name(), equalTo("Italy"));
 		assertThat(page.getContent().get(PAGE_SIZE - 1).name(), equalTo("Emilia Romagna"));
-		assertThat(page.getContent().get(PAGE_SIZE - 1).country().localName(), equalTo("Italy"));
+		assertThat(page.getContent().get(PAGE_SIZE - 1).country().name(), equalTo("Italy"));
 	}
 
 	@Test
@@ -130,7 +130,7 @@ class RegionRepositoryTest {
 				Sort.by(Sort.Order.asc("country.localName"), Sort.Order.desc("name")));
 		Page<Region> page = regionRepository.find(FilterCriteria.of(), pageable);
 		assertThat(page, iterableWithSize(TOT_NUM_REGIONS));
-		assertThat(page.getContent().get(0).country().localName(), equalTo("Italy"));
+		assertThat(page.getContent().get(0).country().name(), equalTo("Italy"));
 	}
 
 	@Test
@@ -143,6 +143,6 @@ class RegionRepositoryTest {
 		assertThat(region.uuid(), equalTo(expected.uuid()));
 		assertThat(region.name(), equalTo("Piemonte"));
 		assertThat(region.localData().itCodiceIstat(), equalTo("1"));
-		assertThat(region.country().localName(), equalTo("Italy"));
+		assertThat(region.country().name(), equalTo("Italy"));
 	}
 }
