@@ -67,7 +67,7 @@ class RegionControllerTest {
 				.andExpect(jsonPath("$.content").isArray())
 				.andExpect(jsonPath("$.content", hasSize(NUM_REGIONS)))
 				.andExpect(jsonPath("$.content[0].name", is("Abruzzo")))
-				.andExpect(jsonPath("$.content[0].country.localName", is("Italy")))
+				.andExpect(jsonPath("$.content[0].country.name", is("Italy")))
 				.andExpect(jsonPath("$.totalPages", is(1)))
 				.andExpect(jsonPath("$.totalElements", is(NUM_REGIONS)))
 				.andExpect(jsonPath("$.last", is(true)))
@@ -112,7 +112,7 @@ class RegionControllerTest {
 				.andExpect(jsonPath("$.name", is("Piemonte")))
 				.andExpect(jsonPath("$.uuid", is(expected.uuid().toString())))
 				.andExpect(jsonPath("$.localData.itCodiceIstat", is("1")))
-				.andExpect(jsonPath("$.country.localName", is("Italy")))
+				.andExpect(jsonPath("$.country.name", is("Italy")))
 				.andExpect(jsonPath("$.country.uuid").exists());
 	}
 }

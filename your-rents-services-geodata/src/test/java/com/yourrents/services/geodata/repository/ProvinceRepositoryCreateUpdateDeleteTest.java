@@ -29,6 +29,7 @@ import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataConflictException;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
+import com.yourrents.services.geodata.model.GeoReference;
 import com.yourrents.services.geodata.model.Province;
 import com.yourrents.services.geodata.model.ProvinceLocalData;
 import java.util.UUID;
@@ -55,7 +56,7 @@ class ProvinceRepositoryCreateUpdateDeleteTest {
 		UUID venetoUuid = findVenetoUuid();
 		Province newProvince = new Province(null, "New Province",
 				new ProvinceLocalData("10", "NP"),
-				new Province.Region(venetoUuid, null));
+				new GeoReference(venetoUuid, null));
     //when
 		Province result = provinceRepository.create(newProvince);
     //then
@@ -74,7 +75,7 @@ class ProvinceRepositoryCreateUpdateDeleteTest {
 		UUID randomUUID = UUID.randomUUID();
 		Province newProvince = new Province(null, "New Province",
 				null,
-				new Province.Region(randomUUID, null));
+				new GeoReference(randomUUID, null));
 		assertThatExceptionOfType(DataNotFoundException.class).isThrownBy(() ->
 						provinceRepository.create(newProvince))
 				.withMessageContaining(randomUUID.toString())
@@ -127,7 +128,7 @@ class ProvinceRepositoryCreateUpdateDeleteTest {
 		assertThat(province.region().uuid()).isNotEqualByComparingTo(venetoUuid);
 		Province updateProvince = new Province(null, "Update Province",
 				new ProvinceLocalData("11", "22"),
-				new Province.Region(venetoUuid, null));
+				new GeoReference(venetoUuid, null));
     //when
 		Province result = provinceRepository.update(province.uuid(), updateProvince);
     //then
