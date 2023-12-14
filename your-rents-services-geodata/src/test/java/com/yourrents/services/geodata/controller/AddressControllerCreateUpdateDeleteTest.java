@@ -20,13 +20,17 @@ package com.yourrents.services.geodata.controller;
  * #L%
  */
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.yourrents.services.geodata.TestYourRentsGeoDataServiceApplication;
+import com.yourrents.services.geodata.model.Address;
 import com.yourrents.services.geodata.model.City;
 import com.yourrents.services.geodata.repository.AddressRepository;
 import com.yourrents.services.geodata.repository.CityRepository;
@@ -142,5 +146,53 @@ class AddressControllerCreateUpdateDeleteTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
+  @Test
+  void deleteAnExistingAddress() throws Exception {
+    //given
+    Address address = addressRepository.findById(1000000000).orElseThrow();
+    assertThat(address.uuid()).isNotNull();
+
+    //when-then
+    mvc.perform(delete(basePath + ADDRESS_URL + "/" + address.uuid())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  void deleteANotExistingAddress() throws Exception {
+    //given
+    UUID randomUUID = UUID.randomUUID();
+
+    //when-then
+    mvc.perform(delete(basePath + ADDRESS_URL + "/" + randomUUID)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void updateAddressLine1AndCountryOnAnExistingAddress() throws Exception {
+    Address oldAddress = addressRepository.findById(1000000000).orElseThrow();
+    mvc.perform(patch(basePath + ADDRESS_URL + "/" + oldAddress.uuid())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   "addressLine1": "New Address",
+                   "country": {
+                     "localName": "New Country"
+                   }
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.addressLine1", is("New Address")))
+        .andExpect(jsonPath("$.addressLine2", is(oldAddress.addressLine2())))
+        .andExpect(jsonPath("$.postalCode", is(oldAddress.postalCode())))
+        .andExpect(jsonPath("$.city.name", is(oldAddress.city().name())))
+        .andExpect(jsonPath("$.city.uuid", is(oldAddress.city().uuid())))
+        .andExpect(jsonPath("$.province.name", is(oldAddress.province().name())))
+        .andExpect(jsonPath("$.province.uuid", is(oldAddress.province().uuid())))
+        .andExpect(jsonPath("$.country.localName", is("New Country")))
+        .andExpect(jsonPath("$.country.uuid").isEmpty());
+  }
 
 }

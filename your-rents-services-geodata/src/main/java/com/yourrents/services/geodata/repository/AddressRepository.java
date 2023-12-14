@@ -105,23 +105,72 @@ public class AddressRepository {
    * Create a new Address.
    *
    * @return the new created Address
-   * @throws DataNotFoundException if city, province or country cannot be found.
+   * @throws DataNotFoundException if any linked city, province or country cannot be found.
    */
   @Transactional(readOnly = false)
   public Address create(Address address) {
     AddressRecord newAddress = dsl.newRecord(ADDRESS);
-    newAddress.setAddressLine_1(address.addressLine1());
-    newAddress.setAddressLine_2(address.addressLine2());
-    newAddress.setPostalCode(address.postalCode());
+    updateAddressRecord(newAddress, address);
+    newAddress.insert();
+    return findById(newAddress.getId()).orElseThrow();
+  }
+
+  /**
+   * Delete an address
+   *
+   * @return true if the address has been deleted, false otherwise
+   * @throws DataNotFoundException if the address does not exist
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(UUID uuid) {
+    Integer addressId = dsl.select(ADDRESS.ID)
+        .from(ADDRESS)
+        .where(ADDRESS.EXTERNAL_ID.eq(uuid))
+        .fetchOptional(ADDRESS.ID).orElseThrow(
+            () -> new DataNotFoundException("Address not found: " + uuid));
+    return dsl.deleteFrom(ADDRESS)
+        .where(ADDRESS.ID.eq(addressId))
+        .execute() > 0;
+  }
+
+  /**
+   * Update an existing Address.
+   *
+   * @return the updated Address
+   * @throws DataNotFoundException if any linked city, province or country cannot be found.
+   */
+  @Transactional(readOnly = false)
+  public Address update(UUID uuid, Address address) {
+    AddressRecord dbAddress = dsl.selectFrom(ADDRESS)
+        .where(ADDRESS.EXTERNAL_ID.eq(uuid))
+        .fetchOptional().orElseThrow(
+            () -> new DataNotFoundException("Record not found: " + uuid));
+    updateAddressRecord(dbAddress, address);
+    dbAddress.update();
+    return findById(dbAddress.getId())
+        .orElseThrow(() -> new RuntimeException("failed to update address: " + uuid));
+  }
+
+  private void updateAddressRecord(AddressRecord addressRecord, Address address) {
+    if (address.addressLine1() != null) {
+      addressRecord.setAddressLine_1(address.addressLine1());
+    }
+    if (address.addressLine2() != null) {
+      addressRecord.setAddressLine_2(address.addressLine2());
+    }
+    if (address.postalCode() != null) {
+      addressRecord.setPostalCode(address.postalCode());
+    }
     if (address.city() != null) {
       if (address.city().uuid() != null) {
         City city = cityRepository.findByExternalId(address.city().uuid()).orElseThrow(
             () -> new DataNotFoundException("City not found: "
                 + address.city().uuid()));
-        newAddress.setCityExternalId(city.uuid());
-        newAddress.setCity(city.name());
+        addressRecord.setCityExternalId(city.uuid());
+        addressRecord.setCity(city.name());
       } else {
-        newAddress.setCity(address.city().name());
+        addressRecord.setCity(address.city().name());
+        addressRecord.setCityExternalId(null);
       }
     }
     if (address.province() != null) {
@@ -130,10 +179,11 @@ public class AddressRepository {
             .orElseThrow(
                 () -> new DataNotFoundException("Province not found: "
                     + address.province().uuid()));
-        newAddress.setProvinceExternalId(province.uuid());
-        newAddress.setProvince(province.name());
+        addressRecord.setProvinceExternalId(province.uuid());
+        addressRecord.setProvince(province.name());
       } else {
-        newAddress.setProvince(address.province().name());
+        addressRecord.setProvince(address.province().name());
+        addressRecord.setProvinceExternalId(null);
       }
     }
     if (address.country() != null) {
@@ -141,14 +191,13 @@ public class AddressRepository {
         Country country = countryRepository.findByExternalId(address.country().uuid()).orElseThrow(
             () -> new DataNotFoundException("Country not found: "
                 + address.country().uuid()));
-        newAddress.setCountryExternalId(country.uuid());
-        newAddress.setCountry(country.localName());
+        addressRecord.setCountryExternalId(country.uuid());
+        addressRecord.setCountry(country.localName());
       } else {
-        newAddress.setCountry(address.country().localName());
+        addressRecord.setCountry(address.country().localName());
+        addressRecord.setCountryExternalId(null);
       }
     }
-    newAddress.insert();
-    return findById(newAddress.getId()).orElseThrow();
   }
 
   private SelectJoinStep<Record7<UUID, String, String, String, AddressCity, AddressProvince, AddressCountry>> getSelectAddressSpec() {
