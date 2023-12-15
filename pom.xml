@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.your-rents.services</groupId>
 	<artifactId>your-rents-services-parent</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.0.4</version>
 	<packaging>pom</packaging>
 	<name>YourRents Services parent</name>
 	<description>Parent of service projects for the YourRents applications</description>
@@ -50,7 +50,7 @@
 		<connection>scm:git:https://github.com/your-rents/your-rents-services.git</connection>
 		<developerConnection>scm:git:git@github.com:your-rents/your-rents-services.git</developerConnection>
 		<url>https://github.com/your-rents/your-rents-services</url>
-	  <tag>HEAD</tag>
+	  <tag>your-rents-services-parent-0.0.4</tag>
   </scm>
 	<inceptionYear>2023</inceptionYear>
 	<url>https://github.com/your-rents/your-rents-services</url>
