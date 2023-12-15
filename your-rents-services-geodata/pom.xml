@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.your-rents.services</groupId>
 		<artifactId>your-rents-services-parent</artifactId>
-		<version>0.0.4</version>
+		<version>0.0.5-SNAPSHOT</version>
 	</parent>
 	<artifactId>your-rents-services-geodata</artifactId>
 	<name>YourRents GeoData Service</name>
