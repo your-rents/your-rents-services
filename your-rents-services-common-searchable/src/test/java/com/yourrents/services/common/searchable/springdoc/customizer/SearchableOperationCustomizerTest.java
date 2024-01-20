@@ -47,7 +47,6 @@ public class SearchableOperationCustomizerTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     void defaultObjectOperator() {
         MethodParameter methodParameter = getParameterOfMethod("methodWithObjectField",
                 Searchable.class);
@@ -58,7 +57,6 @@ public class SearchableOperationCustomizerTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     void customizedDefaultOperatorsWithNoSupportedFields() {
         MethodParameter methodParameter = getParameterOfMethod("methodWithCustomOperators",
                 Searchable.class);
@@ -68,7 +66,6 @@ public class SearchableOperationCustomizerTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     void customizedDefaultOperatorsWithSupportedFields() {
         MethodParameter methodParameter = getParameterOfMethod("methodWithCustomOperatorsAndFields",
                 Searchable.class);
